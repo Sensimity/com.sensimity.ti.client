@@ -28,9 +28,6 @@
     "analytics",
     "insight"
   ],
-  "dependencies": {
-    "mocha": "~1.21.4"
-  },
   "devDependencies": {
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-watch": "^0.6.1",
@@ -39,9 +36,13 @@
     "grunt-titaniumifier": "^1.1.0",
     "grunt-zip": "^0.16.0",
     "grunt": "^0.4.2",
-    "should": "~4.0.4"
+    "should": "~4.0.4",
+    "mocha": "~1.21.4"
   },
   "nativeDependencies": {
-    "reste": "1.1.4"
+    "reste": "1.1.7",
+    "com.drtech.altbeacon": "1.1.0",
+    "org.beuckman.tibeacons": "0.9.3",
+    "ti.mely": "0.3"
   }
 }
