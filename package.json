@@ -40,7 +40,10 @@
     "mocha": "~1.21.4"
   },
   "nativeDependencies": {
-    "reste": "1.1.7",
+    "alloy": "*",
+    "alloy/underscore": "*",
+    "alloy/backbone": "*",
+    "reste": "1.1.8",
     "com.drtech.altbeacon": "1.1.0",
     "org.beuckman.tibeacons": "0.9.3",
     "ti.mely": "0.3"
