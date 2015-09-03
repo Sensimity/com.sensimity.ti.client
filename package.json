@@ -1,0 +1,47 @@
+{
+  "name": "com.sensimity.ti.client",
+  "version": "0.1.0",
+  "description": "Client communication with the Sensimity platform",
+  "titaniumManifest": {
+    "guid": "376928cb-429f-4c7e-ea30-9d38b7d5a240",
+    "moduleid": "com.sensimity.ti.client"
+  },
+  "author": {
+    "name": "Jeroen van Dijk",
+    "email": "jeroen@enrise.com",
+    "url": "http://www.enrise.com"
+  },
+  "license": "LGPL-2.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sensimity/com.sensimity.ti.client.git"
+  },
+  "engines": {
+    "titaniumsdk": ">= 4.0.0"
+  },
+  "main": "index.js",
+  "keywords": [
+    "titanium",
+    "titaniumifier",
+    "sensimity",
+    "beacons",
+    "analytics",
+    "insight"
+  ],
+  "dependencies": {
+    "mocha": "~1.21.4"
+  },
+  "devDependencies": {
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-test": "~0.12.0",
+    "grunt-titanium": "^0.3.1",
+    "grunt-titaniumifier": "^1.1.0",
+    "grunt-zip": "^0.16.0",
+    "grunt": "^0.4.2",
+    "should": "~4.0.4"
+  },
+  "nativeDependencies": {
+    "reste": "1.1.4"
+  }
+}
