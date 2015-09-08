@@ -45,7 +45,7 @@
     "alloy/backbone": "*",
     "reste": "1.1.8",
     "com.drtech.altbeacon": "1.1.0",
-    "org.beuckman.tibeacons": "0.9.3",
+    "org.beuckman.tibeacons": "0.83",
     "ti.mely": "0.3"
   }
 }
