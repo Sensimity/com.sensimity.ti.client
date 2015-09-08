@@ -32,7 +32,7 @@ module.exports = function(grunt) {
 
         unzip: {
             module: {
-                src: 'dist/com.sensimity.ti.parse-commonjs-<%= pkg.version %>.zip',
+                src: 'dist/com.sensimity.ti.client-commonjs-<%= pkg.version %>.zip',
                 dest: '../../../'
             }
         },
