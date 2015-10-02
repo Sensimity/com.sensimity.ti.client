@@ -17,8 +17,10 @@ The installation- and configurationdescription is optimized for using by the [Ti
 2. Add the following modules to the `modules` folder:
     * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.2.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.2.0/android/dist/com.drtech.altbeacon-android-1.2.0.zip)
     * iOS: [Sensimity TiBeacons module](https://github.com/Sensimity/TiBeacons/blob/0.83/org.beuckman.tibeacons-iphone-0.83.zip)
-3. Add the required RESTE-module into the `modules/commonjs` directory, used for the connection with the Sensimity-API:
-    * Android and iOS RESTE module: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
+3. Add the dependencies into the `modules` directory, used for the connection with the Sensimity-API and to send statistics to Sensimity:
+    * Android/iOS: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
+    * Android: [ti.mely-android-0.1](https://github.com/benbahrenburg/ti.mely/blob/master/Android/dist/ti.mely-android-0.1.zip)
+    * iOS: [ti.mely-iphone-0.3](https://github.com/benbahrenburg/ti.mely/blob/master/iOS/dist/ti.mely-iphone-0.3.zip)
 4. Define the modules into the tiapp.xml:
 
     ```
