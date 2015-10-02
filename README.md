@@ -29,6 +29,8 @@ The installation- and configurationdescription is optimized for using by the [Ti
         <module platform="iphone" version="0.83">org.beuckman.tibeacons</module>
         <module platform="android" version="1.2.0">com.drtech.altbeacon</module>
         <module platform="commonjs" version="1.1.8">reste</module>
+        <module platform="iphone" version="0.3">ti.mely</module>
+        <module platform="android" version="0.1">ti.mely</module>
     </modules>
     ```
 5. Define a path to the backgroundService to use the module on Android:
