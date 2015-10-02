@@ -17,16 +17,19 @@ The installation- and configurationdescription is optimized for using by the [Ti
 2. Add the following modules to the `modules` folder:
     * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.2.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.2.0/android/dist/com.drtech.altbeacon-android-1.2.0.zip)
     * iOS: [Sensimity TiBeacons module](https://github.com/Sensimity/TiBeacons/blob/0.83/org.beuckman.tibeacons-iphone-0.83.zip)
-3. Define the modules into the tiapp.xml:
+3. Add the required RESTE-module into the `modules/commonjs` directory, used for the connection with the Sensimity-API:
+    * Android and iOS RESTE module: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
+4. Define the modules into the tiapp.xml:
 
     ```
     <modules>
         <module platform="commonjs" version="0.1.0">com.sensimity.ti.client</module>
         <module platform="iphone" version="0.83">org.beuckman.tibeacons</module>
         <module platform="android" version="1.2.0">com.drtech.altbeacon</module>
+        <module platform="commonjs" version="1.1.8">reste</module>
     </modules>
     ```
-4. Define a path to the backgroundService to use the module on Android:
+5. Define a path to the backgroundService to use the module on Android:
 
     ```
     <android xmlns:android="http://schemas.android.com/apk/res/android">
@@ -35,7 +38,7 @@ The installation- and configurationdescription is optimized for using by the [Ti
         </services>
     </android>
     ```
-5. Define the reason of using iBeacons
+6. Define the reason of using iBeacons
 
     ```
     <plist>
