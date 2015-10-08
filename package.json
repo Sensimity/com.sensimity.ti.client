@@ -1,6 +1,6 @@
 {
   "name": "com.sensimity.ti.client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Client communication with the Sensimity platform",
   "titaniumManifest": {
     "guid": "376928cb-429f-4c7e-ea30-9d38b7d5a240",
@@ -44,7 +44,7 @@
     "alloy/underscore": "*",
     "alloy/backbone": "*",
     "reste": "1.1.8",
-    "com.drtech.altbeacon": "1.1.0",
+    "com.drtech.altbeacon": "1.2.0",
     "org.beuckman.tibeacons": "0.83",
     "ti.mely": "0.3"
   }
