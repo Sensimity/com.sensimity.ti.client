@@ -44,7 +44,7 @@
     "alloy/underscore": "*",
     "alloy/backbone": "*",
     "reste": "1.1.8",
-    "com.drtech.altbeacon": "1.2.0",
+    "com.drtech.altbeacon": "1.2.1",
     "org.beuckman.tibeacons": "0.83",
     "ti.mely": "0.3"
   }

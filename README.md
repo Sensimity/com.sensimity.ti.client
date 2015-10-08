@@ -15,7 +15,7 @@ The installation- and configurationdescription is optimized for using by the [Ti
 
 1. Download the Sensimity client from the dist folder and copy it into the `modules/commonjs` directory.
 2. Add the following modules to the `modules` folder:
-    * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.2.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.2.0/android/dist/com.drtech.altbeacon-android-1.2.0.zip)
+    * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.2.1.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.2.1/android/dist/com.drtech.altbeacon-android-1.2.1.zip)
     * iOS: [Sensimity TiBeacons module](https://github.com/Sensimity/TiBeacons/blob/0.83/org.beuckman.tibeacons-iphone-0.83.zip)
 3. Add the dependencies into the `modules` directory, used for the connection with the Sensimity-API and to send statistics to Sensimity:
     * Android/iOS: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
@@ -25,9 +25,9 @@ The installation- and configurationdescription is optimized for using by the [Ti
 
     ```
     <modules>
-        <module platform="commonjs" version="0.1.0">com.sensimity.ti.client</module>
+        <module platform="commonjs" version="0.1.2">com.sensimity.ti.client</module>
         <module platform="iphone" version="0.83">org.beuckman.tibeacons</module>
-        <module platform="android" version="1.2.0">com.drtech.altbeacon</module>
+        <module platform="android" version="1.2.1">com.drtech.altbeacon</module>
         <module platform="commonjs" version="1.1.8">reste</module>
         <module platform="iphone" version="0.3">ti.mely</module>
         <module platform="android" version="0.1">ti.mely</module>
