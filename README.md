@@ -7,8 +7,8 @@ Client implementation for communication with the Sensimity platform (http://sens
 
 ## Notes
 To use this module it's necessary to use the special Sensimity-forks of two Appcelerator Titanium modules:
-- Android: [https://github.com/Sensimity/android-altbeacon-module](https://github.com/Sensimity/android-altbeacon-module/tree/1.2.0).
-- iOS: [https://github.com/Sensimity/TiBeacons](https://github.com/Sensimity/TiBeacons/tree/0.83).
+- Android: [https://github.com/Sensimity/android-altbeacon-module](https://github.com/Sensimity/android-altbeacon-module/tree/1.2.1).
+- iOS: [https://github.com/Sensimity/TiBeacons](https://github.com/Sensimity/TiBeacons/tree/0.9.3).
 
 ## Install
 The installation- and configurationdescription is optimized for using by the [Titanium Alloy framework](https://github.com/appcelerator/alloy).
@@ -16,7 +16,7 @@ The installation- and configurationdescription is optimized for using by the [Ti
 1. Download the Sensimity client from the dist folder and copy it into the `modules/commonjs` directory.
 2. Add the following modules to the `modules` folder:
     * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.2.1.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.2.1/android/dist/com.drtech.altbeacon-android-1.2.1.zip)
-    * iOS: [Sensimity TiBeacons module](https://github.com/Sensimity/TiBeacons/blob/0.83/org.beuckman.tibeacons-iphone-0.83.zip)
+    * iOS: [Sensimity TiBeacons module](https://github.com/jbeuckm/TiBeacons/blob/master/org.beuckman.tibeacons-iphone-0.9.3.zip)
 3. Add the dependencies into the `modules` directory, used for the connection with the Sensimity-API and to send statistics to Sensimity:
     * Android/iOS: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
     * Android: [ti.mely-android-0.1](https://github.com/benbahrenburg/ti.mely/blob/master/Android/dist/ti.mely-android-0.1.zip)
@@ -25,8 +25,8 @@ The installation- and configurationdescription is optimized for using by the [Ti
 
     ```
     <modules>
-        <module platform="commonjs" version="0.1.2">com.sensimity.ti.client</module>
-        <module platform="iphone" version="0.83">org.beuckman.tibeacons</module>
+        <module platform="commonjs" version="0.2.0">com.sensimity.ti.client</module>
+        <module platform="iphone" version="0.9.3">org.beuckman.tibeacons</module>
         <module platform="android" version="1.2.1">com.drtech.altbeacon</module>
         <module platform="commonjs" version="1.1.8">reste</module>
         <module platform="iphone" version="0.3">ti.mely</module>
@@ -66,12 +66,21 @@ The installation- and configurationdescription is optimized for using by the [Ti
                     "password": "<string>",
                     // Can be found at the Sensimity-dashboard (after login)
                     "instanceRef": "S-<hex eight characters>-<serial-number>",
+                    // necessary for android usage
                     "backgroundService": "services/handleBackgroundScan.js"
                 }
             }
         }
     ```
-2. Define the backgroundScanner service. This background-service is required on Android. (`app/lib/services/handleBackgroundScan.js`).:
+2. Start scanning:
+
+    ```
+        var sensimity = require('com.sensimity.ti.client');
+        sensimity.start({
+            networkId: <integer>
+        });
+    ```
+3. [ANDROID only] Define the backgroundScanner service. (`app/lib/services/handleBackgroundScan.js`).:
 
     ```
     var Alloy = require('alloy'),
@@ -81,28 +90,20 @@ The installation- and configurationdescription is optimized for using by the [Ti
         var sensimity = require('com.sensimity.ti.client');
         sensimity.startBackgroundScan(<integer network-id>);
     ```
-3. Start scanning:
-
-    ```
-        var sensimity = require('com.sensimity.ti.client');
-        sensimity.start({
-            networkId: <integer>
-        });
-    ```
 
 ### Methods
 All of the methods are accessible by using the Sensimity Client library:
 
 `var sensimity = require('com.sensimity.ti.client');`
 
-* Start scanning within a specified network (foreground)
+* Start scanning within a specified network
 
     ```
     sensimity.start({
         networkId: <integer>
     });
     ```
-* Start scanning within a specified network (background)
+* [ANDROID only] Start scanning within a specified network (background)
 
     ```
     sensimity.startBackgroundScan(<integer network-id>);
@@ -148,3 +149,11 @@ To handle the triggered Business Rules and to handle the detected iBeacons, use 
         };
     });
     ```
+
+### Credits
+
+* [@smclab](https://github.com/smclab) for [titaniumifier](https://github.com/smclab/titaniumifier)
+* [@jbeuckm](https://github.com/jbeuckm) for [TiBeacon](https://github.com/jbeuckm/TiBeacons) 
+* [@dwk5123](https://github.com/dwk5123) for [Android-Altbeacon-module](https://github.com/dwk5123/android-altbeacon-module)
+* [@jasonkneen](https://github.com/jasonkneen) for [RESTe](https://github.com/jasonkneen/RESTe)
+* [@benbahrenburg](https://github.com/benbahrenburg) for [Ti.mely](https://github.com/benbahrenburg/ti.mely)
