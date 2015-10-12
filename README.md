@@ -72,23 +72,29 @@ The installation- and configurationdescription is optimized for using by the [Ti
             }
         }
     ```
-2. Start scanning:
+2. Bootstrap the sensimity logic:
 
     ```
         var sensimity = require('com.sensimity.ti.client');
+        if (OS_IOS) {
+            sensimity.start({
+                networkId: <integer network-id>
+            });
+        } else if (OS_ANDROID) {
+            sensimity.runService();
+        }
+    ```
+3. [ANDROID only] Define the background service. (`app/lib/services/handleBackgroundScan.js`).:
+
+    ```
+        var Alloy = require('alloy'),
+            _ = require('alloy/underscore')._,
+            Backbone = require('alloy/backbone'),
+            ensimity = require('com.sensimity.ti.client');
+
         sensimity.start({
-            networkId: <integer>
+            networkId: <integer network-id>
         });
-    ```
-3. [ANDROID only] Define the backgroundScanner service. (`app/lib/services/handleBackgroundScan.js`).:
-
-    ```
-    var Alloy = require('alloy'),
-        _ = require('alloy/underscore')._,
-        Backbone = require('alloy/backbone');
-
-        var sensimity = require('com.sensimity.ti.client');
-        sensimity.startBackgroundScan(<integer network-id>);
     ```
 
 ### Methods
@@ -102,11 +108,6 @@ All of the methods are accessible by using the Sensimity Client library:
     sensimity.start({
         networkId: <integer>
     });
-    ```
-* [ANDROID only] Start scanning within a specified network (background)
-
-    ```
-    sensimity.startBackgroundScan(<integer network-id>);
     ```
 * Stop scanning every network
 
@@ -153,7 +154,7 @@ To handle the triggered Business Rules and to handle the detected iBeacons, use 
 ### Credits
 
 * [@smclab](https://github.com/smclab) for [titaniumifier](https://github.com/smclab/titaniumifier)
-* [@jbeuckm](https://github.com/jbeuckm) for [TiBeacon](https://github.com/jbeuckm/TiBeacons) 
+* [@jbeuckm](https://github.com/jbeuckm) for [TiBeacon](https://github.com/jbeuckm/TiBeacons)
 * [@dwk5123](https://github.com/dwk5123) for [Android-Altbeacon-module](https://github.com/dwk5123/android-altbeacon-module)
 * [@jasonkneen](https://github.com/jasonkneen) for [RESTe](https://github.com/jasonkneen/RESTe)
 * [@benbahrenburg](https://github.com/benbahrenburg) for [Ti.mely](https://github.com/benbahrenburg/ti.mely)
