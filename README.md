@@ -25,7 +25,7 @@ The installation- and configurationdescription is optimized for using by the [Ti
 
     ```
     <modules>
-        <module platform="commonjs" version="0.2.0">com.sensimity.ti.client</module>
+        <module platform="commonjs" version="0.3.0">com.sensimity.ti.client</module>
         <module platform="iphone" version="0.9.3">org.beuckman.tibeacons</module>
         <module platform="android" version="1.3.0">com.drtech.altbeacon</module>
         <module platform="commonjs" version="1.1.8">reste</module>
@@ -89,17 +89,20 @@ The installation- and configurationdescription is optimized for using by the [Ti
 3. [ANDROID only] Define the background service. (`app/lib/android/services/handleBackgroundScan.js`).:
 
     ```
-        var Alloy = require('alloy'),
-            _ = require('alloy/underscore')._,
-            Backbone = require('alloy/backbone'),
-            ensimity = require('com.sensimity.ti.client');
+		var service = Ti.Android.currentService;
+		var serviceIntent = service.intent;
+		var sensimity = require('com.sensimity.ti.client');
 
-        // It's possible to grab the networkId given in at the `runService` function
-        var sensimity = require('com.sensimity.ti.client');
-        sensimity.start({
-            networkId: serviceIntent.getIntExtra('networkId', -1),
-            runInService: true // This means it doesn't matter if the rootActivity closed, it continues background-scanning anyway.
-        });
+		// Stop sensimity on taskremoved service
+		service.addEventListener('taskremoved', function(){
+			sensimity.stop();
+		});
+
+		sensimity.start({
+		    networkId: serviceIntent.getIntExtra('networkId', -1),
+		    runInService: true,
+		    behavior: 'aggressive'
+		});
     ```
 
 ### Methods
@@ -111,15 +114,25 @@ All of the methods are accessible by using the Sensimity Client library:
 
     ```
     sensimity.start({
-        networkId: <integer>
+        networkId: <integer>,
+		  runInService: true, // Optional, Android only
+		  behavior: 'aggressive|proactive' // Optional, Android only
     });
     ```
 * Stop scanning every network
 
     ```
-    sensimity.stop({
-        networkId: <integer>
-    });
+    sensimity.stop();
+    ```
+* [ANDROID only] Put sensimity into backgroundmode scanning
+
+    ```
+    sensimity.pause();
+    ```
+* [ANDROID only] Put sensimity into foregroundmode scanning back again
+
+    ```
+    sensimity.resume();
     ```
 * Sensimity client
 
