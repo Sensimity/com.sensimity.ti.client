@@ -75,15 +75,18 @@ The installation- and configurationdescription is optimized for using by the [Ti
 2. Bootstrap the sensimity logic (only if BLE enabled):
 
     ```
-        var sensimity = require('com.sensimity.ti.client');
+        var sensimity = require('com.sensimity.ti.client'),
+            onFailure = function (failureMessage) {
+                console.log('sensimity start failed');
+            };
         if (OS_IOS) {
             sensimity.start({
                 networkId: <integer network-id>
-            });
+            }, onFailure);
         } else if (OS_ANDROID) {
             sensimity.runService({
                  networkId: <integer network-id>
-            });
+            }, onFailure);
         }
     ```
 3. [ANDROID only] Define the background service. (`app/lib/android/services/handleBackgroundScan.js`).:
@@ -116,7 +119,7 @@ All of the methods are accessible by using the Sensimity Client library:
         networkId: <integer>,
 		runInService: true, // Optional, Android only
 		behavior: 'aggressive|proactive' // Optional, Android only
-    });
+    }, <onFailure callback>);
     ```
 * Stop scanning every network
 
