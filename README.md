@@ -76,17 +76,19 @@ The installation- and configurationdescription is optimized for using by the [Ti
 
     ```
         var sensimity = require('com.sensimity.ti.client'),
-            onFailure = function (failureMessage) {
-                console.log('sensimity start failed');
+            callback = function (successMessage) {
+                if (!successMessage.success) {
+                    console.log('sensimity start failed');
+                }
             };
         if (OS_IOS) {
             sensimity.start({
                 networkId: <integer network-id>
-            }, onFailure);
+            }, callback);
         } else if (OS_ANDROID) {
             sensimity.runService({
                  networkId: <integer network-id>
-            }, onFailure);
+            }, callback);
         }
     ```
 3. [ANDROID only] Define the background service. (`app/lib/android/services/handleBackgroundScan.js`).:
@@ -113,13 +115,13 @@ All of the methods are accessible by using the Sensimity Client library:
 
 `var sensimity = require('com.sensimity.ti.client');`
 
-* Start scanning within a specified network (only if BLE enabled)
+* Start scanning within a specified network (only if BLE enabled), if BLE disabled please check the callback
     ```
     sensimity.start({
         networkId: <integer>,
 		runInService: true, // Optional, Android only
 		behavior: 'aggressive|proactive' // Optional, Android only
-    }, <onFailure callback>);
+    }, <success callback>);
     ```
 * Stop scanning every network
 
