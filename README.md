@@ -7,16 +7,16 @@ Client implementation for communication with the Sensimity platform (http://sens
 
 ## Notes
 To use this module it's necessary to use the special Sensimity-forks of two Appcelerator Titanium modules:
-- Android: [https://github.com/Sensimity/android-altbeacon-module](https://github.com/Sensimity/android-altbeacon-module/tree/1.3.0).
-- iOS: [https://github.com/Sensimity/TiBeacons](https://github.com/Sensimity/TiBeacons/tree/0.9.3).
+- Android: [https://github.com/Sensimity/android-altbeacon-module](https://github.com/Sensimity/android-altbeacon-module/tree/1.4.0).
+- iOS: [https://github.com/Sensimity/TiBeacons](https://github.com/Sensimity/TiBeacons/tree/0.10.0).
 
 ## Install
 The installation- and configurationdescription is optimized for using by the [Titanium Alloy framework](https://github.com/appcelerator/alloy).
 
 1. Download the Sensimity client from the dist folder and copy it into the `modules/commonjs` directory.
 2. Add the following modules to the `modules` folder:
-    * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.3.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.2.1/android/dist/com.drtech.altbeacon-android-1.3.0.zip)
-    * iOS: [Sensimity TiBeacons module](https://github.com/jbeuckm/TiBeacons/blob/master/org.beuckman.tibeacons-iphone-0.9.3.zip)
+    * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.4.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.4.0/android/dist/com.drtech.altbeacon-android-1.4.0.zip)
+    * iOS: [Sensimity TiBeacons module](https://github.com/jbeuckm/TiBeacons/blob/master/org.beuckman.tibeacons-iphone-0.10.0.zip)
 3. Add the dependencies into the `modules` directory, used for the connection with the Sensimity-API and to send statistics to Sensimity:
     * Android/iOS: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
     * Android: [ti.mely-android-0.1](https://github.com/benbahrenburg/ti.mely/blob/master/Android/dist/ti.mely-android-0.1.zip)
@@ -25,9 +25,9 @@ The installation- and configurationdescription is optimized for using by the [Ti
 
     ```
     <modules>
-        <module platform="commonjs" version="0.3.0">com.sensimity.ti.client</module>
-        <module platform="iphone" version="0.9.3">org.beuckman.tibeacons</module>
-        <module platform="android" version="1.3.0">com.drtech.altbeacon</module>
+        <module platform="commonjs" version="0.4.0">com.sensimity.ti.client</module>
+        <module platform="iphone" version="0.10.0">org.beuckman.tibeacons</module>
+        <module platform="android" version="1.4.0">com.drtech.altbeacon</module>
         <module platform="commonjs" version="1.1.8">reste</module>
         <module platform="iphone" version="0.3">ti.mely</module>
         <module platform="android" version="0.1">ti.mely</module>
@@ -72,18 +72,23 @@ The installation- and configurationdescription is optimized for using by the [Ti
             }
         }
     ```
-2. Bootstrap the sensimity logic:
+2. Bootstrap the sensimity logic (only if BLE enabled):
 
     ```
-        var sensimity = require('com.sensimity.ti.client');
+        var sensimity = require('com.sensimity.ti.client'),
+            callback = function (successMessage) {
+                if (!successMessage.success) {
+                    console.log('sensimity start failed');
+                }
+            };
         if (OS_IOS) {
             sensimity.start({
                 networkId: <integer network-id>
-            });
+            }, callback);
         } else if (OS_ANDROID) {
             sensimity.runService({
                  networkId: <integer network-id>
-            });
+            }, callback);
         }
     ```
 3. [ANDROID only] Define the background service. (`app/lib/android/services/handleBackgroundScan.js`).:
@@ -110,19 +115,30 @@ All of the methods are accessible by using the Sensimity Client library:
 
 `var sensimity = require('com.sensimity.ti.client');`
 
-* Start scanning within a specified network
-
+* Start scanning within a specified network (only if BLE enabled), if BLE disabled please check the callback
     ```
     sensimity.start({
         networkId: <integer>,
-		  runInService: true, // Optional, Android only
-		  behavior: 'aggressive|proactive' // Optional, Android only
-    });
+		runInService: true, // Optional, Android only
+		behavior: 'aggressive|proactive' // Optional, Android only
+    }, <success callback>);
     ```
 * Stop scanning every network
 
     ```
     sensimity.stop();
+    ```
+* Check BLE supported on current device
+
+    ```
+    Ti.API.info('Is BLE scanning supported: 'sensimity.isBLESupported());
+    ```
+* Check BLE is supported and enabled on current device
+
+    ```
+    sensimity.isBLEEnabled(function (enabled) {
+        Ti.API.info('Is BLE scanning enabled: ' + enabled);
+    });
     ```
 * [ANDROID only] Put sensimity into backgroundmode scanning
 

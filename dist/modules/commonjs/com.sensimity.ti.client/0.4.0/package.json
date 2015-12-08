@@ -19,7 +19,7 @@
   "engines": {
     "titaniumsdk": ">= 4.0.0"
   },
-  "main": "index.js",
+  "main": "com.sensimity.ti.client.js",
   "keywords": [
     "titanium",
     "titaniumifier",
@@ -40,6 +40,15 @@
     "mocha": "~1.21.4"
   },
   "nativeDependencies": {
+    "alloy": "*",
+    "alloy/underscore": "*",
+    "alloy/backbone": "*",
+    "reste": "1.1.8",
+    "com.drtech.altbeacon": "1.4.0",
+    "org.beuckman.tibeacons": "0.10.0",
+    "ti.mely": "0.3"
+  },
+  "_nativeDependencies": {
     "alloy": "*",
     "alloy/underscore": "*",
     "alloy/backbone": "*",
