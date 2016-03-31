@@ -155,6 +155,7 @@ function isBLEEnabled(callback) {
     scanner.isBLEEnabled(callback);
 }
 
+
 module.exports = {
     'start': start,
     'stop': stop,

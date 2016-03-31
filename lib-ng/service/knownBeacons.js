@@ -74,15 +74,19 @@ function handleSuccessfullFetchingBeacons(data) {
 // Save all new beacons
 function saveNewBeacons(beaconArray) {
     var library = getEarlierSavedKnownBeacons();
-    _.each(beaconArray, function(beacon) {
+    _.each(beaconArray, function (beacon) {
         var checkBeaconAlreadySaved = library.where({
-            beacon_id: beacon.beacon_id
+            beacon_id: beacon.beacon_id,
         });
         if (_.isEmpty(checkBeaconAlreadySaved)) {
             beacon.UUID = beacon.uuid_beacon.toUpperCase();
+            beacon.is_geofence = !_.isUndefined(beacon.is_geofence) ? beacon.is_geofence : false;
             var sensimityKnownBeacon = baseSensimityService.createSensimityModel('KnownBeacon', beacon);
             sensimityKnownBeacon.save();
 
+            if (!sensimityKnownBeacon.get('is_geofence')) {
+                return;
+            }
             // Also refetch all existing business rules
             businessRuleService.fetchBusinessRules(sensimityKnownBeacon);
         }
