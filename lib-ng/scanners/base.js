@@ -118,12 +118,12 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         if (geofenceBeacons.length === 0) {
             return;
         }
-        const geofenceLib = require('./../scanners/geofence');
-        geofenceLib.init();
-        geofenceLib.stopMonitoring();
+        const pathsenseLib = require('./../scanners/pathsense');
+        pathsenseLib.init();
+        pathsenseLib.stopMonitoring();
         geofenceBeacons.forEach((beacon) => {
             const identifier = `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`;
-            geofenceLib.startMonitoring({
+            pathsenseLib.startMonitoring({
                 identifier,
                 latitude: beacon.get('latitude'),
                 longitude: beacon.get('longitude'),
