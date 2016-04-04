@@ -106,15 +106,15 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
 
     this.startScanningAfterBinding = function () {
         var knownBeacons = knownBeaconService.getKnownBeacons(self.networkId);
-        var realBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
+        var bleBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
         var geofenceBeacons = knownBeacons.filter(knownBeacon => knownBeacon.get('is_geofence'));
-        startScanningOfKnownBeacons(realBeacons);
+        startScanningOfKnownBeacons(bleBeacons);
         self.addAllEventListeners();
         self.startScanningGeofences(geofenceBeacons);
     };
 
     this.startScanningGeofences = function(geofenceBeacons) {
-        // fallback for locations who doesn't have physical-BLE-Beacons
+        // fallback for locations who don't have physical-BLE-Beacons
         if (geofenceBeacons.length === 0) {
             return;
         }
