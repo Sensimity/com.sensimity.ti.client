@@ -84,6 +84,7 @@ function saveNewBeacons(beaconArray) {
             var sensimityKnownBeacon = baseSensimityService.createSensimityModel('KnownBeacon', beacon);
             sensimityKnownBeacon.save();
 
+            // Geofences don't contain business rules, so don't fetch them
             if (!sensimityKnownBeacon.get('is_geofence')) {
                 return;
             }
