@@ -106,9 +106,9 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
 
     this.startScanningAfterBinding = function () {
         var knownBeacons = knownBeaconService.getKnownBeacons(self.networkId);
-        var realBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
+        var bleBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
         var geofenceBeacons = knownBeacons.filter(knownBeacon => knownBeacon.get('is_geofence'));
-        startScanningOfKnownBeacons(realBeacons);
+        startScanningOfKnownBeacons(bleBeacons);
         self.addAllEventListeners();
         self.startScanningGeofences(geofenceBeacons);
     };
@@ -121,13 +121,28 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         const pathsenseLib = require('./../scanners/pathsense');
         pathsenseLib.init();
         pathsenseLib.stopMonitoring();
-        geofenceBeacons.forEach((beacon) => {
+        const geofenceRegions = geofenceBeacons.map((beacon) => {
             const identifier = `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`;
-            pathsenseLib.startMonitoring({
+            return {
                 identifier,
                 latitude: beacon.get('latitude'),
                 longitude: beacon.get('longitude'),
                 radius: 100,
+            };
+        });
+        Ti.Geolocation.getCurrentPosition((e) => {
+            let nearestGeofenceRegions = geofenceRegions;
+            if (!e.success) {
+                nearestGeofenceRegions = geofenceRegions;
+            } else {
+                nearestGeofenceRegions = pathsenseLib.sortRegionsByDistance(geofenceRegions, {
+                    latitude: e.coords.latitude,
+                    longitude: e.coords.longitude,
+                });
+            }
+
+            nearestGeofenceRegions.forEach((region) => {
+                pathsenseLib.startMonitoring(region);
             });
         });
     };
