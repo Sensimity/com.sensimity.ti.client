@@ -16,7 +16,10 @@ exports.definition = {
             "description": "TEXT",
             "UUID": "TEXT",
             "major": "INTEGER",
-            "minor": "INTEGER"
+            "minor": "INTEGER",
+            "latitude": "REAL",
+            "longitude": "REAL",
+            "is_geofence": "INTEGER"
         },
         adapter: {
             db_name: "sensimity",

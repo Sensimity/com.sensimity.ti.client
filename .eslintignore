@@ -1,0 +1,8 @@
+# node_modules ignored by default
+
+# Ignore task runners
+Gulpfile.js
+dev/gulp/**/*.js
+
+# Ignore transpiled JS
+lib/**/*.js

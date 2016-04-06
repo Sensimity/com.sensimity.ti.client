@@ -38,19 +38,13 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         }
 
         self.networkId = networkIdentifier;
-        var isOldTiVersion = function () {
-            if (version[0] < 5) { // Version < 5
-                return true;
-            }
-            return (version[0] === 5 && version[1] === 0); // Version 5.0.*
-        };
 
         if (!OS_IOS) {
-            this.prepareForScanning();
+            self.prepareForScanning();
             return;
         }
 
-        this.handleiOSLocationPermissions();
+        self.handleiOSLocationPermissions();
     };
 
     this.prepareForScanning = function () {
@@ -64,26 +58,33 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         knownBeaconService.refreshBeacons([self.networkId]);
     };
 
+    this.isOldTiVersion = function () {
+        var version = Ti.version.split(".");
+        if (version[0] < 5) { // Version < 5
+            return true;
+        }
+        return (version[0] === 5 && version[1] === 0); // Version 5.0.*
+    };
+
     this.handleiOSLocationPermissions = function () {
         // Handle iOS
-        var version = Ti.version.split(".");
         var permissionType = Ti.Geolocation.AUTHORIZATION_ALWAYS;
-        if (isOldTiVersion()) { // Version 5.0.*
+        if (self.isOldTiVersion()) { // Version 5.0.*
             // BC: request permission the old way for Titanium < 5.0
             Ti.Geolocation.requestAuthorization(permissionType);
-            this.prepareForScanning();
+            self.prepareForScanning();
             return;
         }
 
         if (Ti.Geolocation.hasLocationPermissions(permissionType)) {
-            this.prepareForScanning();
+            self.prepareForScanning();
             return;
         }
 
         // Request permission and wait for success
         Ti.Geolocation.requestLocationPermissions(permissionType, function(res) {
             if (res.success) {
-                this.prepareForScanning();
+                self.prepareForScanning();
             }
         });
     };
@@ -105,10 +106,30 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
 
     this.startScanningAfterBinding = function () {
         var knownBeacons = knownBeaconService.getKnownBeacons(self.networkId);
-        if (!_.isEmpty(knownBeacons)) {
-            startScanningOfKnownBeacons(knownBeacons);
-        }
+        var bleBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
+        var geofenceBeacons = knownBeacons.filter(knownBeacon => knownBeacon.get('is_geofence'));
+        startScanningOfKnownBeacons(bleBeacons);
         self.addAllEventListeners();
+        self.startScanningGeofences(geofenceBeacons);
+    };
+
+    this.startScanningGeofences = function(geofenceBeacons) {
+        // fallback for locations who don't have physical-BLE-Beacons
+        if (geofenceBeacons.length === 0) {
+            return;
+        }
+        const geofenceLib = require('./../scanners/geofence');
+        geofenceLib.init();
+        geofenceLib.stopMonitoring();
+        geofenceBeacons.forEach((beacon) => {
+            const identifier = `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`;
+            geofenceLib.startMonitoring({
+                identifier,
+                latitude: beacon.get('latitude'),
+                longitude: beacon.get('longitude'),
+                radius: 100,
+            });
+        });
     };
 
     /**
