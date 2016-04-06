@@ -1,5 +1,5 @@
-var GeofenceLib = require('com.sensimity.ti.geofence'),
-    beaconMapper = require('./../mapper/geofence/beacon'),
+var PathSense = require('com.sensimity.ti.pathsense'),
+    beaconMapper = require('./../mapper/pathsense/beacon'),
     beaconHandler = require('./../handlers/beaconHandler');
 
 var enteredRegion = (geofenceRegion) => {
@@ -8,19 +8,19 @@ var enteredRegion = (geofenceRegion) => {
 };
 
 const init = () => {
-    GeofenceLib.addEventListener('enteredRegion', enteredRegion);
+    PathSense.addEventListener('enteredRegion', enteredRegion);
 };
 
 const destruct = () => {
-    GeofenceLib.removeEventListener('enteredRegion', enteredRegion);
+    PathSense.removeEventListener('enteredRegion', enteredRegion);
 };
 
 const startMonitoring = (region) => {
-    GeofenceLib.startMonitoringForRegion(region);
+    PathSense.startMonitoringForRegion(region);
 };
 
 const stopMonitoring = () => {
-    GeofenceLib.stopMonitoringAllRegions();
+    PathSense.stopMonitoringAllRegions();
 };
 
 exports.init = init;

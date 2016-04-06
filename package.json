@@ -59,7 +59,7 @@
     "reste": "1.1.8",
     "com.drtech.altbeacon": "1.4.0",
     "org.beuckman.tibeacons": "0.11.1",
-    "com.sensimity.ti.geofence": "0.1.0",
+    "com.sensimity.ti.pathsense": "0.1.0",
     "ti.mely": "0.3"
   }
 }
