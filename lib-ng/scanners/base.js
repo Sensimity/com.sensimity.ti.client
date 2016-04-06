@@ -114,7 +114,7 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     };
 
     this.startScanningGeofences = function(geofenceBeacons) {
-        // fallback for locations who doesn't have physical-BLE-Beacons
+        // fallback for locations who don't have physical-BLE-Beacons
         if (geofenceBeacons.length === 0) {
             return;
         }
