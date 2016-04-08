@@ -155,7 +155,6 @@ function isBLEEnabled(callback) {
     scanner.isBLEEnabled(callback);
 }
 
-
 module.exports = {
     'start': start,
     'stop': stop,
@@ -187,16 +186,23 @@ function createScanner(options) {
 
 // Initialize the sensimityscanner and start scanning on added networkID
 function initScannerAndStartScanning(options) {
-    if (_.has(options, 'networkId') && !_.isNull(options.networkId)) {
-        Alloy.Globals.sensimityScanner.init(options.networkId);
+    if (_.has(options, 'networkId') && null !== options.networkId) {
+        Alloy.Globals.sensimityScanner.init(options.networkId, getHooks(options));
         if (OS_ANDROID && _.has(options, 'behavior')) {
             Alloy.Globals.sensimityScanner.setBehavior(options.behavior);
         }
-        Alloy.Globals.sensimityScanner.startScanning();
         Alloy.Globals.sensimityEvent.on('sensimity:beaconsRefreshed', restartScanner);
+        Alloy.Globals.sensimityScanner.startScanning();
     } else {
         Ti.API.warn('Please add a networkId, scanner not started');
     }
+}
+
+function getHooks(options) {
+    if (_.isObject(options.hooks)) {
+        return options.hooks;
+    }
+    return {};
 }
 
 // After refreshing beacons, restart the scanner

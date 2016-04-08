@@ -31,13 +31,15 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
      * Initialise the scanner.
      * @param networkIdentifier the identifier of the Sensimity-network which must be scanned
      */
-    this.init = function (networkIdentifier) {
+    this.init = function (networkIdentifier, hooks = {}) {
         if (_.isUndefined(networkIdentifier)) {
             Ti.API.warn('Network identifier is undefined. Scanner not initialized');
             return;
         }
 
         self.networkId = networkIdentifier;
+        self.hooks = hooks;
+        initializeHooks();
 
         if (!OS_IOS) {
             self.prepareForScanning();
@@ -101,27 +103,26 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
      * Start scanning of beacons in setting beaconId
      */
     this.startScanning = function () {
-        self.bindService(this.startScanningAfterBinding);
+        // Check the hook is defined. If the 'getRegionsToMonitor' hook is defined, that
+        // will be called. If it's not defined the default scan strategy will be used.
+        self.bindService(
+            _.isFunction(self.hooks.getRegionsToMonitor) ?
+            updateRegionsToMonitor :
+            this.startScanningAfterBinding
+        );
     };
 
-    this.startScanningAfterBinding = function () {
-        var knownBeacons = knownBeaconService.getKnownBeacons(self.networkId);
-        var bleBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
-        var geofenceBeacons = knownBeacons.filter(knownBeacon => knownBeacon.get('is_geofence'));
+    this.startScanningAfterBinding = (knownBeacons = knownBeaconService.getKnownBeacons(self.networkId)) => {
+        const bleBeacons = knownBeacons.filter(knownBeacon => (knownBeacon.get('is_geofence') === 0));
+        const geofenceBeacons = knownBeacons.filter(knownBeacon => (knownBeacon.get('is_geofence') === 1));
         startScanningOfKnownBeacons(bleBeacons);
+        startScanningGeofences(geofenceBeacons);
         self.addAllEventListeners();
-        self.startScanningGeofences(geofenceBeacons);
     };
 
-    this.startScanningGeofences = function(geofenceBeacons) {
-        // fallback for locations who don't have physical-BLE-Beacons
-        if (geofenceBeacons.length === 0) {
-            return;
-        }
-        const pathsenseLib = require('./../scanners/pathsense');
-        pathsenseLib.init();
-        pathsenseLib.stopMonitoring();
-        const geofenceRegions = geofenceBeacons.map((beacon) => {
+    function getGeofenceRegions(geofenceBeacons) {
+        // Convert beacons into the expected geofence format
+        return geofenceBeacons.map((beacon) => {
             const identifier = `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`;
             return {
                 identifier,
@@ -130,22 +131,28 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
                 radius: 100,
             };
         });
+    }
+
+    /**
+     * When the hook 'getRegionsToMonitor' isn't defined, use the default scanning of geofences
+     */
+    function defaultScanGeofences(pathsenseLib, geofenceBeacons) {
+        let nearestGeofenceRegions = getGeofenceRegions(geofenceBeacons);
+        // Use the current position to detect the 20 nearest geofences within 7500 m
         Ti.Geolocation.getCurrentPosition((e) => {
-            let nearestGeofenceRegions = geofenceRegions;
-            if (!e.success) {
-                nearestGeofenceRegions = geofenceRegions;
-            } else {
-                nearestGeofenceRegions = pathsenseLib.sortRegionsByDistance(geofenceRegions, {
+            if (e.success) {
+                nearestGeofenceRegions = pathsenseLib.sortRegionsByDistance(nearestGeofenceRegions, {
                     latitude: e.coords.latitude,
                     longitude: e.coords.longitude,
-                });
+                }, 7500); // Detect only the nearest geofences within 7.5 km
             }
 
-            nearestGeofenceRegions.forEach((region) => {
+            // Geofence only the first 20 regions
+            _.first(nearestGeofenceRegions, 20).forEach((region) => {
                 pathsenseLib.startMonitoring(region);
             });
         });
-    };
+    }
 
     /**
      * Map a found beacon and start the beaconHandler
@@ -164,6 +171,23 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         beaconHandler.handle(beacon);
     };
 
+    function initializeHooks(hooks)  {
+        // Make sure no duplicate eventlisteners are defined
+        Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', updateRegionsToMonitor);
+        Ti.App.addEventListener('sensimity:hooks:updateRegionsToMonitor', updateRegionsToMonitor);
+    }
+
+    function updateRegionsToMonitor() {
+        if (!_.isFunction(self.hooks.getRegionsToMonitor)) {
+            return;
+        }
+        const knownBeacons = knownBeaconService.getKnownBeacons(self.networkId);
+        const beaconsToMonitor = self.hooks.getRegionsToMonitor(knownBeacons);
+        self.Beacons.stopMonitoringAllRegions();
+        self.beaconRegions = [];
+        self.startScanningAfterBinding(beaconsToMonitor);
+    }
+
     /**
      * Destruct the scanner
      */
@@ -179,18 +203,51 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     function startScanningOfKnownBeacons(knownBeacons) {
         _.each(knownBeacons, function (knownBeacon) {
             if (!_.isEqual(knownBeacon.get('UUID'), null)) {
-                startScanningOfBeacon(knownBeacon);
+                startScanningOfBLEBeacon(knownBeacon);
             }
         });
     }
 
     /**
-     * Start scanning of a beacon
-     * @param knownBeacon The beacon which will be scanning
+     * Start scanning geofences
+     * @param geofenceBeacons
      */
-    function startScanningOfBeacon(knownBeacon) {
+    function startScanningGeofences(geofenceBeacons) {
+        // fallback for locations who don't have physical-BLE-Beacons
+        if (geofenceBeacons.length === 0) {
+            return;
+        }
+        const pathsenseLib = require('./../scanners/pathsense');
+        pathsenseLib.init();
+        stopScanningGeofences(pathsenseLib);
+        // The regions are already filtered by using the hook, so start monitoring directly
+        if (_.isFunction(self.hooks.getRegionsToMonitor)) {
+            scanGeofencesWithoutLocationDetection(pathsenseLib, geofenceBeacons);
+            return;
+        }
+
+        defaultScanGeofences(pathsenseLib, geofenceBeacons);
+    }
+
+    // Stop scanning geofences
+    function stopScanningGeofences(pathsenseLib) {
+        pathsenseLib.stopMonitoring();
+    }
+
+    function scanGeofencesWithoutLocationDetection(pathsenseLib, geofenceBeacons) {
+        const geofenceRegions = getGeofenceRegions(geofenceBeacons);
+        geofenceRegions.forEach((region) => {
+            pathsenseLib.startMonitoring(region);
+        });
+    }
+
+    /**
+     * Start scanning of a BLE-beacon
+     * @param knownBeacon The BLE-beacon which will be scanning
+     */
+    function startScanningOfBLEBeacon(knownBeacon) {
         // Reduce scanned beaconregions
-        if (isBeaconRegionScanning(knownBeacon)) {
+        if (isBLEBeaconRegionScanning(knownBeacon)) {
             return;
         }
 
@@ -205,10 +262,10 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
      * @param knownBeacon Check this beacon scanned now
      * @returns false if beaconRegion is scanning, true if not scanning
      */
-    function isBeaconRegionScanning(knownBeacon) {
+    function isBLEBeaconRegionScanning(knownBeacon) {
         // Check beaconregion already scanning
         return _.some(self.beaconRegions, function (region) {
-            return _.isEqual(region.uuid.toUpperCase(), knownBeacon.get('UUID').toUpperCase());
+            return region.uuid.toUpperCase() === knownBeacon.get('UUID').toUpperCase();
         });
     }
 };
