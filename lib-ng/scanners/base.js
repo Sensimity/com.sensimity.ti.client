@@ -113,8 +113,8 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     };
 
     this.startScanningAfterBinding = (knownBeacons = knownBeaconService.getKnownBeacons(self.networkId)) => {
-        const bleBeacons = knownBeacons.filter(knownBeacon => (knownBeacon.get('is_geofence') === 0));
-        const geofenceBeacons = knownBeacons.filter(knownBeacon => (knownBeacon.get('is_geofence') === 1));
+        const bleBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
+        const geofenceBeacons = knownBeacons.filter(knownBeacon => knownBeacon.get('is_geofence'));
         startScanningOfKnownBeacons(bleBeacons);
         startScanningGeofences(geofenceBeacons);
         self.addAllEventListeners();
