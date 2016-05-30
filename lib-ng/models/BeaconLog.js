@@ -54,10 +54,35 @@ model = Alloy.M("BeaconLog", exports.definition, [ function(migration) {
     migration.name = "BeaconLog";
     migration.id = "20160520094700";
     migration.up = function(migrator) {
-        migrator.db.execute("ALTER TABLE " + migrator.table + " ADD COLUMN beacon_id INTEGER;");
+        // sqlite has no drop column support
+        migrator.dropTable();
+        migrator.createTable({
+            columns: {
+                "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+                "beacon_id": "INTEGER",
+                "UUID": "TEXT",
+                "major": "INTEGER",
+                "minor": "INTEGER",
+                "rssi": "INTEGER",
+                "accuracy": "INTEGER",
+                "timestamp": "INTEGER"
+            }
+        });
     };
     migration.down = function(migrator) {
-        migrator.db.execute("ALTER TABLE " + migrator.table + " DROP COLUMN beacon_id;");
+        // sqlite has no drop column support
+        migrator.dropTable();
+        migrator.createTable({
+            columns: {
+                "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+                "UUID": "TEXT",
+                "major": "INTEGER",
+                "minor": "INTEGER",
+                "rssi": "INTEGER",
+                "accuracy": "INTEGER",
+                "timestamp": "INTEGER"
+            }
+        });
     };
 }]);
 collection = Alloy.C("BeaconLog", exports.definition, model);
