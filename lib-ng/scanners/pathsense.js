@@ -21,6 +21,7 @@ const startMonitoring = (region) => {
 
 const stopMonitoring = () => {
     PathSense.stopMonitoringAllRegions();
+    destruct();
 };
 
 /**
