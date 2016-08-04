@@ -196,8 +196,10 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     this.destruct = function () {
         Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', updateRegionsToMonitor);
         stopScanningGeofences();
+        if (pathsenseLib !== null) {
+            pathsenseLib.destruct();
+        }
         self.beaconRegions = [];
-        pathsenseLib = null;
     };
 
     /**
