@@ -42,7 +42,7 @@ function Beuckman() {
         };
         self.Beacons.addEventListener('bluetoothStatus', handleBleStatus);
 
-        _.defer(function() { self.Beacons.requestBluetoothStatus(); });
+        _.defer(() => self.Beacons.requestBluetoothStatus());
     };
 
     // Bindservice function is required in from the Basescanner, but Beuckman contains no bindoption

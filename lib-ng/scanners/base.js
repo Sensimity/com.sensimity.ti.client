@@ -22,7 +22,8 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         beaconHandler = require('./../handlers/beaconHandler'),
         beaconLog = require('./../service/beaconLog'),
         knownBeaconService = require('./../service/knownBeacons'),
-        pathsenseLib = null;
+        pathsenseLib = null,
+        scanning = false;
 
     /**
      * Public functions
@@ -116,9 +117,10 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     this.startScanningAfterBinding = (knownBeacons = knownBeaconService.getKnownBeacons(self.networkId)) => {
         const bleBeacons = knownBeacons.filter(knownBeacon => !knownBeacon.get('is_geofence'));
         const geofenceBeacons = knownBeacons.filter(knownBeacon => knownBeacon.get('is_geofence'));
+        self.addAllEventListeners();
         startScanningOfKnownBeacons(bleBeacons);
         startScanningGeofences(geofenceBeacons);
-        self.addAllEventListeners();
+        scanning = true;
     };
 
     function getGeofenceRegions(geofenceBeacons) {
@@ -190,10 +192,15 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         self.startScanningAfterBinding(beaconsToMonitor);
     }
 
+    this.isScanning = function() {
+        return scanning;
+    };
+
     /**
      * Destruct the scanner
      */
     this.destruct = function () {
+        scanning = false;
         Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', updateRegionsToMonitor);
         stopScanningGeofences();
         if (pathsenseLib !== null) {
