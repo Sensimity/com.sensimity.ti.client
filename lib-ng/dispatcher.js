@@ -1,7 +1,5 @@
-/* jshint ignore:start */
-var Alloy = require('alloy'),
-    _ = require('alloy/underscore')._,
-    Backbone = require('alloy/backbone');
-/* jshint ignore:end */
+import Backbone from 'alloy/backbone';
+import _ from 'alloy/underscore';
 
-module.exports = _.clone(Backbone.Events);
+const dispatcher = () => _.clone(Backbone.Events);
+export default dispatcher;

@@ -1,37 +1,35 @@
-var PathSense = require('com.sensimity.ti.pathsense'),
-    beaconMapper = require('./../mapper/pathsense/beacon'),
-    beaconHandler = require('./../handlers/beaconHandler');
+import PathSenseLib from 'com.sensimity.ti.pathsense';
+import beaconMapper from './../mapper/pathsense/beacon';
+import beaconHandler from './../handlers/beaconHandler';
 
-var enteredRegion = (geofenceRegion) => {
-    var beacon = beaconMapper.map(geofenceRegion);
+class Pathsense {
+  constructor() {
+    PathSenseLib.addEventListener('enteredRegion', this.enteredRegion);
+  }
+
+  enteredRegion(geofenceRegion) {
+    const beacon = beaconMapper.map(geofenceRegion);
     beaconHandler.handle(beacon);
-};
+  }
 
-const init = () => {
-    PathSense.addEventListener('enteredRegion', enteredRegion);
-};
+  startMonitoring(region) {
+    PathSenseLib.startMonitoringForRegion(region);
+  }
 
-const destruct = () => {
-    PathSense.removeEventListener('enteredRegion', enteredRegion);
-};
+  stopMonitoring() {
+    PathSenseLib.stopMonitoringAllRegions();
+  }
 
-const startMonitoring = (region) => {
-    PathSense.startMonitoringForRegion(region);
-};
+  /**
+  * Sort geofence-regions by distance inside a defined radius from a predefined location.
+  */
+  sortRegionsByDistance(regions, location, defaultRadius = 5000) {
+    return PathSenseLib.sortRegionsByDistance(regions, location, defaultRadius);
+  }
 
-const stopMonitoring = () => {
-    PathSense.stopMonitoringAllRegions();
-};
+  destruct() {
+    PathSenseLib.removeEventListener('enteredRegion', this.enteredRegion);
+  }
+}
 
-/**
-* Sort geofence-regions by distance inside a defined radius from a predefined location.
-*/
-const sortRegionsByDistance = (regions, location, defaultRadius = 5000) => {
-	return PathSense.sortRegionsByDistance(regions, location, defaultRadius);
-};
-
-exports.init = init;
-exports.destruct = destruct;
-exports.startMonitoring = startMonitoring;
-exports.stopMonitoring = stopMonitoring;
-exports.sortRegionsByDistance = sortRegionsByDistance;
+export default Pathsense;

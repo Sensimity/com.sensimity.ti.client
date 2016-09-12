@@ -1,48 +1,45 @@
-/* jshint ignore:start */
-var Alloy = require('alloy'),
-    _ = require('alloy/underscore')._,
-    Backbone = require('alloy/backbone');
-/* jshint ignore:end */
-
-/**
- * Public functions
- */
+import { Model as BeaconLogModel, Collection as BeaconLogCollection } from './../models/BeaconLog';
+import { Model as BeaconNotifiedModel, Collection as BeaconNotifiedCollection } from './../models/BeaconNotified';
+import { Model as BusinessRuleModel, Collection as BusinessRuleCollection } from './../models/BusinessRule';
+import { Model as KnownBeaconModel, Collection as KnownBeaconCollection } from './../models/KnownBeacon';
 
 /**
  * Use an Model defined in the sensimity library
  * @param name The name of the model
  * @param args Arguments for creating a Backbone model
  */
-function createSensimityModel(name, args) {
-    switch (name) {
-        case "BeaconLog":
-            return new (require("./../models/BeaconLog").Model)(args);
-        case "BeaconNotified":
-            return new (require("./../models/BeaconNotified").Model)(args);
-        case "BusinessRule":
-            return new (require("./../models/BusinessRule").Model)(args);
-        default:
-            return new (require("./../models/KnownBeacon").Model)(args);
-    }
-}
+const createSensimityModel = (name, args) => {
+  switch (name) {
+  case 'BeaconLog':
+    return new BeaconLogModel(args);
+  case 'BeaconNotified':
+    return new BeaconNotifiedModel(args);
+  case 'BusinessRule':
+    return new BusinessRuleModel(args);
+  default:
+    return new KnownBeaconModel(args);
+  }
+};
 
 /**
  * Use an Collection defined in the sensimity library
  * @param name The name of the model-collection
  * @param args Arguments for creating a Backbone collection
  */
-function createSensimityCollection(name, args) {
-    switch (name) {
-        case "BeaconLog":
-            return new (require("./../models/BeaconLog").Collection)(args);
-        case "BeaconNotified":
-            return new (require("./../models/BeaconNotified").Collection)(args);
-        case "BusinessRule":
-            return new (require("./../models/BusinessRule").Collection)(args);
-        default:
-            return new (require("./../models/KnownBeacon").Collection)(args);
-    }
-}
+const createSensimityCollection = (name, args) => {
+  switch (name) {
+  case 'BeaconLog':
+    return new BeaconLogCollection(args);
+  case 'BeaconNotified':
+    return new BeaconNotifiedCollection(args);
+  case 'BusinessRule':
+    return new BusinessRuleCollection(args);
+  default:
+    return new KnownBeaconCollection(args);
+  }
+};
 
-exports.createSensimityModel = createSensimityModel;
-exports.createSensimityCollection = createSensimityCollection;
+export default {
+  createSensimityModel,
+  createSensimityCollection,
+};

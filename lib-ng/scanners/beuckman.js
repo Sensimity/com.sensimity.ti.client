@@ -1,107 +1,91 @@
-/* jshint ignore:start */
-var Alloy = require('alloy'),
-    _ = require('alloy/underscore')._,
-    Backbone = require('alloy/backbone');
-/* jshint ignore:end */
+import BaseScanner from './../scanners/base';
+import beaconMapper from './../mapper/beuckman/beacon';
+import beaconRegionMapper from './../mapper/beuckman/beaconRegion';
+import beaconRegionMonitoringMapper from './../mapper/beuckman/beaconRegionMonitoring';
 
-var BaseScanner = require('./../scanners/base');
-var beaconMapper = require('./../mapper/beuckman/beacon');
-var beaconRegionMapper = require('./../mapper/beuckman/beaconRegion');
-var beaconRegionMonitoringMapper = require('./../mapper/beuckman/beaconRegionMonitoring');
+export default class BeuckmanScanner extends BaseScanner {
+  /**
+   * Beuckman scanner to scan iBeacons on iOS
+   * @returns {BaseScanner}
+   * @constructor
+   */
+  constructor() {
+    super(beaconMapper, beaconRegionMapper, beaconRegionMonitoringMapper);
+    this.Beacons = require('org.beuckman.tibeacons');
+    this.beaconRangerHandler = this.beaconRangerHandler.bind(this);
+    this.regionState = this.regionState.bind(this);
+  }
 
-/**
- * Beuckman scanner to scan iBeacons on iOS
- * @returns {BaseScanner}
- * @constructor
- */
-function Beuckman() {
-    // set self = basescanner to use this function as an abstract function for the beuckmanfunction
-    var self = new BaseScanner(beaconMapper, beaconRegionMapper, beaconRegionMonitoringMapper);
-    self.Beacons = require('org.beuckman.tibeacons');
+  isBLESupported() {
+    return this.Beacons.isBLESupported();
+  }
 
-    self.isBLESupported = function () {
-        return self.Beacons.isBLESupported();
+  isBLEEnabled(callback) {
+    if (!_.isFunction(callback)) {
+      Ti.API.warn('please define a function callback, ble status cannot be retrieved');
+      return;
+    }
+    const handleBleStatus = e => {
+      // Useless status See https://github.com/jbeuckm/TiBeacons/issues/24
+      if (e.status === 'unknown') {
+        return;
+      }
+      this.Beacons.removeEventListener('bluetoothStatus', handleBleStatus);
+      if (e.status === 'on') {
+        callback(true);
+      } else {
+        callback(false);
+      }
     };
+    this.Beacons.addEventListener('bluetoothStatus', handleBleStatus);
 
-    self.isBLEEnabled = function (callback) {
-        if (!_.isFunction(callback)) {
-            Ti.API.warn('please define a function callback, ble status cannot be retrieved');
-            return;
-        }
-        var handleBleStatus = function (e) {
-            // Useless status See https://github.com/jbeuckm/TiBeacons/issues/24
-            if (e.status === 'unknown') {
-                return;
-            }
-            self.Beacons.removeEventListener('bluetoothStatus', handleBleStatus);
-            if (e.status === 'on') {
-                callback(true);
-            } else {
-                callback(false);
-            }
-        };
-        self.Beacons.addEventListener('bluetoothStatus', handleBleStatus);
+    _.defer(() => this.Beacons.requestBluetoothStatus());
+  }
 
-        _.defer(() => self.Beacons.requestBluetoothStatus());
-    };
+  // Bindservice function is required in from the Basescanner, but Beuckman contains no bindoption
+  bindService(bindCallback) {
+    bindCallback();
+  }
 
-    // Bindservice function is required in from the Basescanner, but Beuckman contains no bindoption
-    self.bindService = function (bindCallback) {
-        bindCallback();
-    };
+  // Start ranging beacons when a beaconregion is detected
+  enterRegion(param) {
+    this.Beacons.startRangingForBeacons(param);
+  }
 
-    // Start ranging beacons when a beaconregion is detected
-    self.enterRegion = function (param) {
-        self.Beacons.startRangingForBeacons(param);
-    };
+  // Stop ranging beacons for a region when a beaconregion is exited
+  exitRegion(param) {
+    this.Beacons.stopRangingForBeacons(param);
+  }
 
-    // Stop ranging beacons for a region when a beaconregion is exited
-    self.exitRegion = function (param) {
-        self.Beacons.stopRangingForBeacons(param);
-    };
+  // Call beaconfound for every found beacon and handle the found beacons
+  beaconRangerHandler(param) {
+    _.each(param.beacons, beacon => this.beaconFound(beacon));
+  }
 
-    // Call beaconfound for every found beacon and handle the found beacons
-    self.beaconRangerHandler = function (param) {
-        param.beacons.forEach(function (beacon) {
-            self.beaconFound(beacon);
-        });
-    };
+  regionState(e) {
+    if (e.regionState === 'inside') {
+      this.Beacons.startRangingForBeacons(_.pick(e, 'uuid', 'identifier'));
+    } else if (e.regionState === 'outside') {
+      this.Beacons.stopRangingForBeacons(_.pick(e, 'uuid', 'identifier'));
+    }
+  }
 
-    self.regionState = function (e) {
-        if (e.regionState === 'inside') {
-            self.Beacons.startRangingForBeacons({
-                uuid: e.uuid,
-                identifier: e.identifier
-            });
-        } else if (e.regionState === 'outside') {
-            self.Beacons.stopRangingForBeacons({
-                uuid: e.uuid,
-                identifier: e.identifier
-            });
-        }
-    };
+  // override stopscanning
+  stopScanning() {
+    this.removeAllEventListeners();
+    this.Beacons.stopMonitoringAllRegions();
+    this.Beacons.stopRangingForAllBeacons();
+    this.destruct();
+  }
 
-    // override stopscanning
-    self.stopScanning = function () {
-        self.removeAllEventListeners();
-        self.Beacons.stopMonitoringAllRegions();
-        self.Beacons.stopRangingForAllBeacons();
-        self.destruct();
-    };
+  // Add eventlisteners, called by startingscan in Basescanner
+  addAllEventListeners() {
+    this.Beacons.addEventListener('beaconRanges', this.beaconRangerHandler);
+    this.Beacons.addEventListener('determinedRegionState', this.regionState);
+  }
 
-    // Add eventlisteners, called by startingscan in Basescanner
-    self.addAllEventListeners = function () {
-        self.Beacons.addEventListener('beaconRanges', self.beaconRangerHandler);
-        self.Beacons.addEventListener('determinedRegionState', self.regionState);
-    };
-
-    // Remove eventlisteners on stop scanning
-    self.removeAllEventListeners = function () {
-        self.Beacons.removeEventListener('beaconRanges', self.beaconRangerHandler);
-        self.Beacons.removeEventListener('determinedRegionState', self.regionState);
-    };
-
-    return self;
+  removeAllEventListeners() {
+    this.Beacons.removeEventListener('beaconRanges', this.beaconRangerHandler);
+    this.Beacons.removeEventListener('determinedRegionState', this.regionState);
+  }
 }
-
-module.exports = Beuckman;

@@ -1,211 +1,196 @@
-/* jshint ignore:start */
-var Alloy = require('alloy'),
-    _ = require('alloy/underscore')._,
-    Backbone = require('alloy/backbone');
-/* jshint ignore:end */
-
-'use strict';
-/* Compatibility for Ti standalone (without Alloy) */
-if (typeof OS_ANDROID === "undefined") {
-    var OS_ANDROID = Ti.Platform.name === "android";
-    var OS_IOS = Ti.Platform.name === "iPhone OS";
-}
-
-var sensimityClient = require('./client/client');
-var knownBeaconsService = require('./service/knownBeacons');
+import { _ } from 'alloy/underscore';
+import client from './client/client';
+import { getKnownBeacons } from './service/knownBeacons';
+import Altbeacon from './scanners/altbeacon';
+import Beuckman from './scanners/beuckman';
+import dispatcher from './dispatcher';
 
 if (_.isUndefined(Alloy.Globals.sensimityEvent)) {
-    Alloy.Globals.sensimityEvent = require('./dispatcher');
+  Alloy.Globals.sensimityEvent = dispatcher();
 }
+
+// Create an scanner, specific for the running platform
+const createScanner = options => {
+  if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
+    return Alloy.Globals.sensimityScanner;
+  }
+
+  if (Ti.Platform.name === 'android') {
+    let runInService = false;
+    if (_.isBoolean(options.runInService)) {
+      runInService = options.runInService;
+    }
+    // Android, use the altbeaconscanner to scan iBeacons
+    Alloy.Globals.sensimityScanner = new Altbeacon(runInService);
+  }
+
+  if (Ti.Platform.name === 'iPhone OS') {
+    // iOS, use the beuckmanscanner to scan iBeacons
+    Alloy.Globals.sensimityScanner = new Beuckman();
+  }
+};
+
+const isBLESupported = options => {
+  createScanner(options);
+  Alloy.Globals.sensimityScanner.isBLESupported();
+};
+
+const isBLEEnabled = (options, callback) => {
+  createScanner(options);
+  Alloy.Globals.sensimityScanner.isBLEEnabled(callback);
+};
+
+const getHooks = options => _.isObject(options.hooks) ? options.hooks : {};
+
+// After refreshing beacons, restart the scanner
+const restartScanner = () => {
+  if (!_.isUndefined(Alloy.Globals.sensimityScanner)) {
+    Alloy.Globals.sensimityScanner.stopScanning();
+    Alloy.Globals.sensimityScanner.startScanning();
+  }
+};
+
+// Initialize the sensimityscanner and start scanning on added networkID
+const initScannerAndStartScanning = options => {
+  if (_.has(options, 'networkId') && options.networkId !== null) {
+    Alloy.Globals.sensimityScanner.init(options.networkId, getHooks(options));
+    if (Ti.Platform.name === 'android' && _.has(options, 'behavior')) {
+      Alloy.Globals.sensimityScanner.setBehavior(options.behavior);
+    }
+    Alloy.Globals.sensimityEvent.on('sensimity:beaconsRefreshed', restartScanner);
+    Alloy.Globals.sensimityScanner.startScanning();
+    return;
+  }
+  Ti.API.warn('Please add a networkId, scanner not started');
+};
 
 /**
  * Initialize the scanner and start scanning on added network identifier
  * @param options {network_id: <network identifier to scan beacons>}
  * @param callback Callback to inform about the start of sensimity {success: <bool>, message: <string>}
  */
-function start(options, callback) {
+const start = (options, callback) =>
     // Only start Sensimity when bluetooth is enabled
-    isBLEEnabled(options, function (value) {
-        if (!value) {
-            var message = 'Sensimity scan not started because BLE not enabled';
-            Ti.API.warn(message);
-            if (_.isFunction(callback)) {
-                callback({
-                    success: false,
-                    message: message
-                });
-            }
-            return;
-        }
+  isBLEEnabled(options, isEnabled => {
+    if (!isEnabled) {
+      const message = 'Sensimity scan not started because BLE not enabled';
+      Ti.API.warn(message);
+      if (_.isFunction(callback)) {
+        callback({
+          success: false,
+          message,
+        });
+      }
+      return;
+    }
 
-        if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
-            createScanner(options);
-        }
+    createScanner(options);
 
-        if (Alloy.Globals.sensimityScanner.isScanning()) {
-            Ti.API.warn('Scanner already started, please stop first before start scanning');
-        } else {
-            initScannerAndStartScanning(options);
-        }
-        if (_.isFunction(callback)) {
-            callback({
-                success: true,
-                message: 'Sensimity successfully started'
-            });
-        }
-    });
-}
+    if (Alloy.Globals.sensimityScanner.isScanning()) {
+      Ti.API.warn('Scanner already started, please stop first before start scanning');
+    } else {
+      initScannerAndStartScanning(options);
+    }
+    if (_.isFunction(callback)) {
+      callback({
+        success: true,
+        message: 'Sensimity successfully started',
+      });
+    }
+  });
 
 /**
  * Stop scanning
  */
-function stop() {
-    Alloy.Globals.sensimityEvent.off('sensimity:beaconsRefreshed', restartScanner);
-    if (!_.isUndefined(Alloy.Globals.sensimityScanner)) {
-        Alloy.Globals.sensimityScanner.stopScanning();
-    }
-    Alloy.Globals.sensimityScanner = undefined;
-}
+const stop = () => {
+  Alloy.Globals.sensimityEvent.off('sensimity:beaconsRefreshed', restartScanner);
+  if (!_.isUndefined(Alloy.Globals.sensimityScanner)) {
+    Alloy.Globals.sensimityScanner.stopScanning();
+  }
+  Alloy.Globals.sensimityScanner = undefined;
+};
 
-function pause() {
-    if (!OS_ANDROID) {
-        Ti.API.warn('sensimity pause not needed on other platforms than Android');
-        return;
-    }
+const pause = () => {
+  if (Ti.Platform.name !== 'android') {
+    Ti.API.warn('sensimity pause not needed on other platforms than Android');
+    return;
+  }
 
-    if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
-        Ti.API.warn('Scanner not initialized, please first initialize the sensimity library');
-        return;
-    }
+  if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
+    Ti.API.warn('Scanner not initialized, please first initialize the sensimity library');
+    return;
+  }
 
-    Alloy.Globals.sensimityScanner.setBackgroundMode(true);
-}
+  Alloy.Globals.sensimityScanner.setBackgroundMode(true);
+};
 
-function resume() {
-    if (!OS_ANDROID) {
-        Ti.API.warn('sensimity resume not needed on other platforms than Android');
-        return;
-    }
+const resume = () => {
+  if (Ti.Platform.name !== 'android') {
+    Ti.API.warn('sensimity resume not needed on other platforms than Android');
+    return;
+  }
 
-    if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
-        Ti.API.warn('Scanner not initialized, please first initialize the sensimity library');
-        return;
-    }
+  if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
+    Ti.API.warn('Scanner not initialized, please first initialize the sensimity library');
+    return;
+  }
 
-    Alloy.Globals.sensimityScanner.setBackgroundMode(false);
-}
+  Alloy.Globals.sensimityScanner.setBackgroundMode(false);
+};
 
 /**
  * Start background intent for Android
  * @param callback Callback to inform about the start of sensimity {success: <bool>, message: <string>}
  */
-function runService(options, callback) {
+const runService = (options, callback) =>
     // Only start Sensimity when bluetooth is enabled
-    isBLEEnabled(options, function (value) {
-        if (!value) {
-            var message = 'Sensimity scan not started because BLE not enabled';
-            Ti.API.warn(message);
-            if (_.isFunction(callback)) {
-                callback({
-                    success: false,
-                    message: message
-                });
-            }
-            return;
-        }
-
-        if (!OS_ANDROID || _.isUndefined(Alloy.CFG.sensimity.backgroundService)) {
-            return;
-        }
-
-        var intent = Ti.Android.createServiceIntent({
-            url: Alloy.CFG.sensimity.backgroundService,
-            startMode: Ti.Android.START_REDELIVER_INTENT
+  isBLEEnabled(options, isEnabled => {
+    if (!isEnabled) {
+      const message = 'Sensimity scan not started because BLE not enabled';
+      Ti.API.warn(message);
+      if (_.isFunction(callback)) {
+        callback({
+          success: false,
+          message,
         });
-        if (_.isNumber(options.networkId)) {
-            intent.putExtra('networkId', options.networkId);
-        }
-        if (Ti.Android.isServiceRunning(intent)) {
-            Ti.Android.stopService(intent);
-        }
-        Ti.Android.startService(intent);
-        if (_.isFunction(callback)) {
-            callback({
-                success: true,
-                message: 'Sensimity successfully started in a Android service'
-            });
-        }
+      }
+      return;
+    }
+
+    if (Ti.Platform.name !== 'android' || _.isUndefined(Alloy.CFG.sensimity.backgroundService)) {
+      return;
+    }
+
+    const intent = Ti.Android.createServiceIntent({
+      url: Alloy.CFG.sensimity.backgroundService,
+      startMode: Ti.Android.START_REDELIVER_INTENT,
     });
-}
 
-function isBLESupported(options) {
-    if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
-        Alloy.Globals.sensimityScanner = createScanner(options);
+    if (_.isNumber(options.networkId)) {
+      intent.putExtra('networkId', options.networkId);
     }
-    Alloy.Globals.sensimityScanner.isBLESupported();
-}
 
-function isBLEEnabled(options, callback) {
-    if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
-        Alloy.Globals.sensimityScanner = createScanner(options);
+    if (Ti.Android.isServiceRunning(intent)) {
+      Ti.Android.stopService(intent);
     }
-    Alloy.Globals.sensimityScanner.isBLEEnabled(callback);
-}
 
-module.exports = {
-    'start': start,
-    'stop': stop,
-    'pause': pause,
-    'resume': resume,
-    'runService': runService,
-    'client': sensimityClient,
-    'isBLESupported': isBLESupported,
-    'isBLEEnabled': isBLEEnabled,
-    'getKnownBeacons': knownBeaconsService.getKnownBeacons
+    Ti.Android.startService(intent);
+    if (_.isFunction(callback)) {
+      callback({
+        success: true,
+        message: 'Sensimity successfully started in a Android service',
+      });
+    }
+  });
+
+export {
+  start,
+  stop,
+  pause,
+  resume,
+  runService,
+  client,
+  isBLESupported,
+  isBLEEnabled,
+  getKnownBeacons,
 };
-
-// Create an scanner, specific for the running platform
-function createScanner(options) {
-    if (OS_ANDROID) {
-        var runInService = false;
-        if (_.isBoolean(options.runInService)) {
-            runInService = options.runInService;
-        }
-        // Android, use the altbeaconscanner to scan iBeacons
-        var altbeaconScanner = require('./scanners/altbeacon');
-        return altbeaconScanner(runInService);
-    } else if (OS_IOS) {
-        // iOS, use the beuckmanscanner to scan iBeacons
-        var beuckmanScanner = require('./scanners/beuckman');
-        return beuckmanScanner();
-    }
-}
-
-// Initialize the sensimityscanner and start scanning on added networkID
-function initScannerAndStartScanning(options) {
-    if (_.has(options, 'networkId') && null !== options.networkId) {
-        Alloy.Globals.sensimityScanner.init(options.networkId, getHooks(options));
-        if (OS_ANDROID && _.has(options, 'behavior')) {
-            Alloy.Globals.sensimityScanner.setBehavior(options.behavior);
-        }
-        Alloy.Globals.sensimityEvent.on('sensimity:beaconsRefreshed', restartScanner);
-        Alloy.Globals.sensimityScanner.startScanning();
-    } else {
-        Ti.API.warn('Please add a networkId, scanner not started');
-    }
-}
-
-function getHooks(options) {
-    if (_.isObject(options.hooks)) {
-        return options.hooks;
-    }
-    return {};
-}
-
-// After refreshing beacons, restart the scanner
-function restartScanner() {
-    if (!_.isUndefined(Alloy.Globals.sensimityScanner)) {
-        Alloy.Globals.sensimityScanner.stopScanning();
-        Alloy.Globals.sensimityScanner.startScanning();
-    }
-}
