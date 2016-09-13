@@ -80,7 +80,7 @@ function saveNewBeacons(beaconArray) {
         });
         if (_.isEmpty(checkBeaconAlreadySaved)) {
             beacon.UUID = beacon.uuid_beacon.toUpperCase();
-            beacon.is_geofence = !_.isUndefined(beacon.is_geofence) ? beacon.is_geofence : false;
+            beacon.is_geofence = !_.isUndefined(beacon.is_geofence) ? (beacon.is_geofence ? 1 : 0) : 0;
             var sensimityKnownBeacon = baseSensimityService.createSensimityModel('KnownBeacon', beacon);
             sensimityKnownBeacon.save();
 
