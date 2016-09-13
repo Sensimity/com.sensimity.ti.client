@@ -23,7 +23,15 @@ const stopMonitoring = () => {
     PathSense.stopMonitoringAllRegions();
 };
 
+/**
+* Sort geofence-regions by distance inside a defined radius from a predefined location.
+*/
+const sortRegionsByDistance = (regions, location, defaultRadius = 5000) => {
+	return PathSense.sortRegionsByDistance(regions, location, defaultRadius);
+};
+
 exports.init = init;
 exports.destruct = destruct;
 exports.startMonitoring = startMonitoring;
 exports.stopMonitoring = stopMonitoring;
+exports.sortRegionsByDistance = sortRegionsByDistance;
