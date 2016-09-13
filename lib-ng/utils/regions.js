@@ -15,12 +15,12 @@ const getBLERegions = beacons => _.uniq(
 , false, beacon => beacon.identifier);
 
 // Use the current position to detect the 20 nearest geofences within 7500 m
-const getNearestGeofences = ({ pathsenseScanner, regions, callback }) =>
+const getNearestGeofences = ({ sortRegionsByDistance, regions, callback }) =>
   Ti.Geolocation.getCurrentPosition((e) => {
     let nearestGeofenceRegions;
     if (e.success) {
       // Detect only the nearest geofences within 7.5 km
-      nearestGeofenceRegions = pathsenseScanner.sortRegionsByDistance(regions, _.pick(e.coords, 'latitude', 'longitude'), 7500);
+      nearestGeofenceRegions = sortRegionsByDistance(regions, _.pick(e.coords, 'latitude', 'longitude'), 7500);
     }
     callback(_.first(nearestGeofenceRegions || regions, 5));
   });

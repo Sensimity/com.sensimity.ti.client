@@ -33,31 +33,42 @@ export default class ScanService {
   start() {
     const regions = this.getRegions();
     if (this.options.startBLE && regions.ble.length > 0) {
-      const callback = () => regions.ble.forEach(region => this.getBLEScanner().startMonitoring(region));
-      if (_.isFunction(this.getBLEScanner().bindService)) {
-        this.getBLEScanner().bindService(callback);
-      } else {
-        callback();
-      }
+      this.startBLE(regions.ble);
     }
 
     if (this.options.startGeofence && regions.geofences.length > 0) {
-      const callback = nearestRegions => nearestRegions.forEach(
-        region => this.getGeofenceScanner().startMonitoring(region)
-      );
-
-      // geofence-regions are already filtered by the hook, nearest geofences filter not needed
-      if (_.isFunction(this.options.hooks.getRegionsToMonitor)) {
-        callback(regions.geofences);
-        return;
-      }
-
-      getNearestGeofences({
-        pathsenseScanner: this.getGeofenceScanner(),
-        regions: regions.geofences,
-        callback,
-      });
+      this.startGeofence(regions.geofences);
     }
+  }
+
+  startBLE(regions) {
+    const scanner = this.getBLEScanner();
+    const callback = () => regions.forEach(region => scanner.startMonitoring(region));
+    if (_.isFunction(scanner.bindService)) {
+      scanner.bindService(callback);
+    } else {
+      callback();
+    }
+  }
+
+  startGeofence(regions) {
+    const scanner = this.getGeofenceScanner();
+    const callback = nearestRegions => nearestRegions.forEach(
+      region => scanner.startMonitoring(region)
+    );
+
+    // geofence-regions are already filtered by the hook, nearest geofences filter not needed
+    if (_.isFunction(this.options.hooks.getRegionsToMonitor)) {
+      callback(regions);
+      return;
+    }
+
+    const sortRegionsByDistance = scanner.sortRegionsByDistance;
+    getNearestGeofences({
+      sortRegionsByDistance,
+      regions,
+      callback,
+    });
   }
 
   stop() {
