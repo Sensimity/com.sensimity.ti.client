@@ -1,7 +1,7 @@
 import { _ } from 'alloy/underscore';
 import client from './client/client';
 import knownBeaconService from './service/knownBeacons';
-import Scan from './provider/ScanProvider';
+import Scan from './service/ScanService';
 import { isBLEEnabled, isBLESupported, requestLocationPermissions } from './utils/permissions';
 import dispatcher from './utils/dispatcher';
 
@@ -37,12 +37,18 @@ const startScanner = options => {
  * @param options {network_id: <network identifier to scan beacons>}
  * @param callback Callback to inform about the start of sensimity {success: <bool>, message: <string>}
  */
-const start = (options, callback) =>
+const start = (args, callback) =>
   // Only start Sensimity when bluetooth is enabled
   requestLocationPermissions(
     (e) => e.success
     ? isBLEEnabled(isEnabled => {
-      if (!isEnabled) {
+      const options = Object.assign({
+        requireBLE: true,
+        startGeofence: true,
+        startBLE: true,
+      }, args);
+
+      if (!isEnabled && options.requireBLE) {
         const message = 'Sensimity scan not started because BLE not enabled';
         Ti.API.warn(message);
         if (_.isFunction(callback)) {
@@ -54,7 +60,9 @@ const start = (options, callback) =>
         return;
       }
 
-      startScanner(options);
+      startScanner(Object.assign(options, {
+        startBLE: (options.startBLE && isEnabled),
+      }));
 
       if (_.isFunction(callback)) {
         callback({

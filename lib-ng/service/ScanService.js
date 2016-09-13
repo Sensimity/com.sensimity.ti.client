@@ -1,12 +1,12 @@
-import Altbeacon from './../scanners/altbeacon';
-import Beuckman from './../scanners/beuckman';
-import Pathsense from './../scanners/pathsense';
-import beaconHandler from './../handlers/beaconHandler';
-import beaconLog from './../service/beaconLog';
-import { split, getNearestGeofences } from './../utils/regions';
-import knownBeaconService from './../service/knownBeacons';
+import Altbeacon from '../scanners/altbeacon';
+import Beuckman from '../scanners/beuckman';
+import Pathsense from '../scanners/pathsense';
+import beaconHandler from '../handlers/beaconHandler';
+import knownBeaconService from './knownBeacons';
+import beaconLog from './beaconLog';
+import { split, getNearestGeofences } from '../utils/regions';
 
-export default class ScanProvider {
+export default class ScanService {
   constructor(options = {
     runInService: false,
     hooks: {},
@@ -32,7 +32,7 @@ export default class ScanProvider {
 
   start() {
     const regions = this.getRegions();
-    if (regions.ble.length > 0) {
+    if (this.options.startBLE && regions.ble.length > 0) {
       const callback = () => regions.ble.forEach(region => this.getBLEScanner().startMonitoring(region));
       if (_.isFunction(this.getBLEScanner().bindService)) {
         this.getBLEScanner().bindService(callback);
@@ -41,7 +41,7 @@ export default class ScanProvider {
       }
     }
 
-    if (regions.geofences.length > 0) {
+    if (this.options.startGeofence && regions.geofences.length > 0) {
       const callback = nearestRegions => nearestRegions.forEach(
         region => this.getGeofenceScanner().startMonitoring(region)
       );
@@ -61,8 +61,12 @@ export default class ScanProvider {
   }
 
   stop() {
-    this.getBLEScanner().stop();
-    this.getGeofenceScanner().stop();
+    if (this.BLEScanner) {
+      this.getBLEScanner().stop();
+    }
+    if (this.geofenceScanner) {
+      this.getGeofenceScanner().stop();
+    }
   }
 
   setBackgroundMode(bgMode) {
