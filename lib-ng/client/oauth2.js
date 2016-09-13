@@ -43,12 +43,10 @@ const setAuth = object => {
 };
 
 // Get now
-function now() {
-  return Math.floor(new Date().getTime() / 1000);
-}
+const now = () => Math.floor(new Date().getTime() / 1000);
 
 // Get access from memory or storage
-function getAccess() {
+const getAccess = () => {
   if (_.isEmpty(access)) {
     const auth = getAuth();
     if (_.isEmpty(auth) || _.isNaN(auth.expires)) {
@@ -61,7 +59,7 @@ function getAccess() {
   }
 
   return access;
-}
+};
 
 // Check the expiredate is undefined or is expired
 const isAccessTokenExpired = () => {
