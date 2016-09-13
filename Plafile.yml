@@ -1,5 +1,5 @@
 global-deps:
-  - npm install -g titaniumifier@1.5.0
+  - npm install -g titaniumifier@1.5.1
 
 pr[number]:
   - git remote prune upstream

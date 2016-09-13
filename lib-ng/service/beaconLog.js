@@ -6,6 +6,7 @@ var Alloy = require('alloy'),
 
 var sensimityClient = require('./../client/client'),
     baseSensimityService = require('./../service/base'),
+    knownBeaconService = require('./../service/knownBeacons'),
     timerModule = require('ti.mely');
 
 /**
@@ -26,13 +27,18 @@ function init() {
 }
 
 /**
- * Create and save a new beaconlog to send in the future to sensimitys
+ * Create and save a new beaconlog to send in the future to sensimity
  * @param beacon A beacon recieved by the beaconscanner
  */
 function insertBeaconLog(beacon) {
-    var timestamp = Math.round(new Date().getTime() / 1000);
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const knownBeacon = knownBeaconService.findKnownBeacon(beacon.UUID, beacon.major, beacon.minor);
     beacon.timestamp = timestamp;
-    var beaconLog = baseSensimityService.createSensimityModel('BeaconLog', beacon);
+    // If beacon = unknown, do nothing
+    if (!_.isEmpty(knownBeacon)) {
+        beacon.beacon_id = knownBeacon.get('beacon_id');
+    }
+    const beaconLog = baseSensimityService.createSensimityModel('BeaconLog', beacon);
     beaconLog.save();
 }
 

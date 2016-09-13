@@ -10,6 +10,7 @@ exports.definition = {
     config: {
         columns: {
             "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+            "beacon_id": "INTEGER",
             "UUID": "TEXT",
             "major": "INTEGER",
             "minor": "INTEGER",
@@ -49,7 +50,16 @@ exports.definition = {
 };
 
 // Alloy compiles models automatically to this statement. In this case the models not exists in /app/models folder, so this must be fixed by set this statements manually.
-model = Alloy.M("BeaconLog", exports.definition, []);
+model = Alloy.M("BeaconLog", exports.definition, [ function(migration) {
+    migration.name = "BeaconLog";
+    migration.id = "20160520094700";
+    migration.up = function(migrator) {
+        migrator.db.execute("ALTER TABLE " + migrator.table + " ADD COLUMN beacon_id INTEGER;");
+    };
+    migration.down = function(migrator) {
+        migrator.db.execute("ALTER TABLE " + migrator.table + " DROP COLUMN beacon_id;");
+    };
+}]);
 collection = Alloy.C("BeaconLog", exports.definition, model);
 exports.Model = model;
 exports.Collection = collection;
