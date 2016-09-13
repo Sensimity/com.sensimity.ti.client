@@ -1,25 +1,20 @@
-const Alloy = require('alloy');
-import { _ } from 'alloy/underscore';
+import Alloy from 'alloy';
 import Reste from 'reste';
 import oauth2 from './oauth2';
 
-let url = 'https://api.sensimity.com/';
 const api = new Reste();
 
-if (!_.isUndefined(Alloy.CFG.sensimity.url)) {
-  url = Alloy.CFG.sensimity.url;
-}
-
 const setApiConfig = () => {
+  const url = Alloy.CFG.sensimity.url || 'https://api.sensimity.com/';
   api.config({
-    debug: true, // allows logging to console of ::REST:: messages
+    debug: false, // allows logging to console of ::REST:: messages
     autoValidateParams: false, // set to true to throw errors if <param> url properties are not passed
     timeout: 10000,
-    url: url,
+    url,
     requestHeaders: {
-      'Accept': 'application/vnd.sensimity.v1+json',
+      Accept: 'application/vnd.sensimity.v1+json',
       'Content-Type': 'application/vnd.sensimity.v1+json',
-      'Authorization': 'Bearer ' + oauth2.getAccess().token,
+      Authorization: 'Bearer ' + oauth2.getAccess().token,
     },
     methods: [
       {
@@ -43,9 +38,8 @@ const setApiConfig = () => {
         post: 'scan-results',
       },
     ],
-    onError: e =>
-      Ti.API.info('There was an error accessing the API > ' + JSON.stringify(e)),
     onLoad: (e, callback) => callback(e),
+    onError: e => Ti.API.info('There was an error accessing the API > ' + JSON.stringify(e)),
   });
 };
 

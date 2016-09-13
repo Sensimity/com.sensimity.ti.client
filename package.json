@@ -57,6 +57,7 @@
     "alloy": "*",
     "alloy/underscore": "*",
     "alloy/backbone": "*",
+    "alloy/dialogs": "*",
     "reste": "1.1.8",
     "com.drtech.altbeacon": "1.4.0",
     "org.beuckman.tibeacons": "0.12.0",

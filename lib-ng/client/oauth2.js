@@ -1,30 +1,24 @@
-const Alloy = require('alloy');
+import Alloy from 'alloy';
 import { _ } from 'alloy/underscore';
 import Reste from 'reste';
 
-const basicAuthHeader = Ti.Utils.base64encode(Alloy.CFG.sensimity.basicHeaderAuthUsername + ':' + Alloy.CFG.sensimity.basicHeaderAuthPassword).toString();
-let url = 'https://api.sensimity.com/';
+const basicAuthHeader =
+  Ti.Utils.base64encode(`${Alloy.CFG.sensimity.basicHeaderAuthUsername}:${Alloy.CFG.sensimity.basicHeaderAuthPassword}`).toString();
 const api = new Reste();
 let access = {};
 
-if (!_.isUndefined(Alloy.CFG.sensimity.url)) {
-  url = Alloy.CFG.sensimity.url;
-}
-
+const url = Alloy.CFG.sensimity.url || 'https://api.sensimity.com/';
 api.config({
-  debug: true, // allows logging to console of ::REST:: messages
+  debug: false, // allows logging to console of ::REST:: messages
   autoValidateParams: false, // set to true to throw errors if <param> url properties are not passed
   timeout: 10000,
   url: url,
   requestHeaders: {
-    'Accept': 'application/vnd.sensimity.v1+json',
+    Accept: 'application/vnd.sensimity.v1+json',
     'Content-Type': 'application/vnd.sensimity.v1+json',
-    'Authorization': 'Basic ' + basicAuthHeader,
+    Authorization: `Basic ${basicAuthHeader}`,
   },
-  methods: [{
-    name: 'oauth',
-    post: 'oauth',
-  }],
+  methods: [{ name: 'oauth', post: 'oauth' }],
   onLoad: (e, callback) => callback(e),
 });
 
@@ -101,8 +95,7 @@ const refreshAccessToken = successCallback => {
   const body = {};
 
   if (isRefreshTokenAvailable()) {
-    const auth = getAuth();
-    body.refresh_token = auth.refreshToken;
+    body.refresh_token = getAuth().refreshToken;
     body.grant_type = 'refresh_token';
   } else {
     body.username = Alloy.CFG.sensimity.username;
@@ -110,13 +103,11 @@ const refreshAccessToken = successCallback => {
     body.grant_type = 'password';
   }
 
-  api.oauth({
-    body,
-  }, response => {
-    if (!_.isUndefined(response.status)) {
+  api.oauth({ body }, response => {
+    if (response.status) {
       switch (response.status) {
       case 400:
-        if (!_.isUndefined(response.title) && response.title === 'invalid_grant') {
+        if (response.title === 'invalid_grant') {
           setAuth({});
           refreshAccessToken(successCallback);
         }
@@ -139,7 +130,7 @@ const refreshAccessToken = successCallback => {
 const init = clientReady =>
     // Check the refreshtoken is expired, if expired retrieve a new accesstoken
   isAccessTokenExpired() ?
-      refreshAccessToken(clientReady) : clientReady();// Set callback
+      refreshAccessToken(clientReady) : clientReady(); // Set callback
 
 export default {
   init,

@@ -1,7 +1,6 @@
 import { _ } from 'alloy/underscore';
-
-import sensimityClient from './../client/client';
-import baseSensimityService from './../service/base';
+import client from './../client/client';
+import { createSensimityCollection, createSensimityModel } from './../service/base';
 
 /**
  * Create a new businessrule item from the data received from Sensimity
@@ -9,7 +8,7 @@ import baseSensimityService from './../service/base';
  * @returns BusinessRule a created businessrule
  */
 const createNewBusinessRuleItem = data =>
-  baseSensimityService.createSensimityModel('BusinessRule', {
+  createSensimityModel('BusinessRule', {
     business_rule_id: data.business_rule_id,
     beacon_id: data.beacon_id,
     type: data.business_rule_type,
@@ -38,7 +37,7 @@ const setNewDataInExistingBusinessRule = (existingBusinessRule, data) => {
  * @param id businessRuleId
  */
 const findExistingBusinessRule = businessRuleId => {
-  const library = baseSensimityService.createSensimityCollection('BusinessRule');
+  const library = createSensimityCollection('BusinessRule');
   library.fetch();
   const businessRule = library.where({business_rule_id: businessRuleId});
   if (_.isEmpty(businessRule)) {
@@ -70,20 +69,19 @@ const saveFetchedBusinessRules = data => {
  * Function to refresh the beacons from Sensimity of a known beacon
  * @param {Object} knownBeacon find the business rules of this beacon
  */
-const fetchBusinessRules = knownBeacon => {
-  sensimityClient.getBusinessRules(knownBeacon.get('network_id'), knownBeacon.get('beacon_id'), data => {
+const fetchBusinessRules = knownBeacon =>
+  client.getBusinessRules(knownBeacon.get('network_id'), knownBeacon.get('beacon_id'), data => {
     if (!_.isEmpty(data._embedded.business_rule)) {
-      _.each(data._embedded.business_rule, businessruleRaw => saveFetchedBusinessRules(businessruleRaw));
+      data._embedded.business_rule.forEach(businessruleRaw => saveFetchedBusinessRules(businessruleRaw));
     }
   });
-};
 
 /**
  * Function to get all the business rules already saved on the phone
  * @param knownBeacon knownBeacon Get the business rules of this beacon
  */
 const getBusinessRules = knownBeacon => {
-  const library = baseSensimityService.createSensimityCollection('BusinessRule');
+  const library = createSensimityCollection('BusinessRule');
   library.fetch();
   return library.where({beacon_id: knownBeacon.get('beacon_id')});
 };

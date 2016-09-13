@@ -1,4 +1,4 @@
-const Alloy = require('alloy');
+import Alloy from 'alloy';
 
 let model;
 let collection;

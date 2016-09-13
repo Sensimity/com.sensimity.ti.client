@@ -1,50 +1,20 @@
 import BaseScanner from './../scanners/base';
 import beaconMapper from './../mapper/beuckman/beacon';
-import beaconRegionMapper from './../mapper/beuckman/beaconRegion';
-import beaconRegionMonitoringMapper from './../mapper/beuckman/beaconRegionMonitoring';
 
 export default class BeuckmanScanner extends BaseScanner {
-  /**
-   * Beuckman scanner to scan iBeacons on iOS
-   * @returns {BaseScanner}
-   * @constructor
-   */
-  constructor() {
-    super(beaconMapper, beaconRegionMapper, beaconRegionMonitoringMapper);
+  constructor(beaconLog, beaconHandler) {
+    super(beaconMapper, beaconLog, beaconHandler);
     this.Beacons = require('org.beuckman.tibeacons');
     this.beaconRangerHandler = this.beaconRangerHandler.bind(this);
     this.regionState = this.regionState.bind(this);
+    this.addAllEventListeners();
   }
 
-  isBLESupported() {
-    return this.Beacons.isBLESupported();
-  }
-
-  isBLEEnabled(callback) {
-    if (!_.isFunction(callback)) {
-      Ti.API.warn('please define a function callback, ble status cannot be retrieved');
-      return;
-    }
-    const handleBleStatus = e => {
-      // Useless status See https://github.com/jbeuckm/TiBeacons/issues/24
-      if (e.status === 'unknown') {
-        return;
-      }
-      this.Beacons.removeEventListener('bluetoothStatus', handleBleStatus);
-      if (e.status === 'on') {
-        callback(true);
-      } else {
-        callback(false);
-      }
-    };
-    this.Beacons.addEventListener('bluetoothStatus', handleBleStatus);
-
-    _.defer(() => this.Beacons.requestBluetoothStatus());
-  }
-
-  // Bindservice function is required in from the Basescanner, but Beuckman contains no bindoption
-  bindService(bindCallback) {
-    bindCallback();
+  startMonitoring(region) {
+    this.Beacons.startMonitoringForRegion({
+      uuid: region.UUID,
+      identifier: region.identifier,
+    });
   }
 
   // Start ranging beacons when a beaconregion is detected
@@ -59,7 +29,7 @@ export default class BeuckmanScanner extends BaseScanner {
 
   // Call beaconfound for every found beacon and handle the found beacons
   beaconRangerHandler(param) {
-    _.each(param.beacons, beacon => this.beaconFound(beacon));
+    param.beacons.forEach(beacon => this.beaconFound(beacon));
   }
 
   regionState(e) {
@@ -70,12 +40,9 @@ export default class BeuckmanScanner extends BaseScanner {
     }
   }
 
-  // override stopscanning
-  stopScanning() {
-    this.removeAllEventListeners();
+  stop() {
     this.Beacons.stopMonitoringAllRegions();
     this.Beacons.stopRangingForAllBeacons();
-    this.destruct();
   }
 
   // Add eventlisteners, called by startingscan in Basescanner

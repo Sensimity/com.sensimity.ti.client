@@ -1,16 +1,9 @@
 import BaseScanner from './../scanners/base';
 import beaconMapper from './../mapper/altbeacon/beacon';
-import beaconRegionMapper from './../mapper/altbeacon/beaconRegion';
-import beaconRegionMonitoringMapper from './../mapper/altbeacon/beaconRegionMonitoring';
 
 export default class AltbeaconScanner extends BaseScanner {
-  /**
-   * Altbeacon scanner to scan iBeacons on Android devices
-   * @param boolean backgroundMode - Parameter to handle beacons when the application is running in backgroundmode
-   * @returns {BaseScanner}
-   */
-  constructor(runInService) {
-    super(beaconMapper, beaconRegionMapper, beaconRegionMonitoringMapper);
+  constructor(runInService, beaconLog, beaconHandler) {
+    super(beaconMapper, beaconLog, beaconHandler);
     this.Beacons = require('com.drtech.altbeacon');
     this.scanPeriods = {
       proactive: {
@@ -28,18 +21,7 @@ export default class AltbeaconScanner extends BaseScanner {
     };
     this.runInService = runInService;
     this.beaconFound = this.beaconFound.bind(this);
-  }
-
-  isBLESupported() {
-    return this.Beacons.isBLESupported();
-  }
-
-  isBLEEnabled(callback) {
-    if (!_.isFunction(callback)) {
-      Ti.API.warn('please define a function callback, ble status cannot be retrieved');
-      return;
-    }
-    callback(this.Beacons.checkAvailability());
+    this.addAllEventListeners();
   }
 
   bindService(bindCallback) {
@@ -55,13 +37,18 @@ export default class AltbeaconScanner extends BaseScanner {
     this.Beacons.bindBeaconService();
   }
 
-  stopScanning() {
+  startMonitoring(region) {
+    this.Beacons.startMonitoringForRegion({
+      uuid: region.UUID,
+      identifier: region.identifier,
+    });
+  }
+
+  stop() {
     if (this.Beacons.beaconServiceIsBound()) {
       this.Beacons.stopMonitoringAllRegions();
       this.Beacons.unbindBeaconService();
     }
-    this.removeAllEventListeners();
-    this.destruct();
   }
 
   addAllEventListeners() {

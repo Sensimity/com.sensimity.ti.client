@@ -39,7 +39,7 @@ const createSensimityCollection = (name, args) => {
   }
 };
 
-export default {
+export {
   createSensimityModel,
   createSensimityCollection,
 };

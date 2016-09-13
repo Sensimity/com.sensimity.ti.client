@@ -1,4 +1,4 @@
-const Alloy = require('alloy');
+import Alloy from 'alloy';
 import { _ } from 'alloy/underscore';
 import businessRuleService from './../service/businessRule';
 import knownBeaconService from'./../service/knownBeacons';
@@ -59,27 +59,27 @@ const handleBusinessRule = (businessRule, beacon, knownBeacon) => {
   };
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.far) && _.isEqual(beacon.proximity, proximities.far)) {
-    Alloy.Globals.sensimityEvent.trigger('sensimity:businessrule', businessRuleTriggerItem);
+    Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
     Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.close) && _.isEqual(beacon.proximity, proximities.close)) {
-    Alloy.Globals.sensimityEvent.trigger('sensimity:businessrule', businessRuleTriggerItem);
+    Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
     Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.immediate) && _.isEqual(beacon.proximity, proximities.immediate)) {
-    Alloy.Globals.sensimityEvent.trigger('sensimity:businessrule', businessRuleTriggerItem);
+    Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
     Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.movingTowards) && checkMovingTowards(beacon.proximity, knownBeacon.get('beacon_id'))) {
-    Alloy.Globals.sensimityEvent.trigger('sensimity:businessrule', businessRuleTriggerItem);
+    Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
     Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.movingAwayFrom) && checkMovingAwayFrom(beacon.proximity, knownBeacon.get('beacon_id'))) {
-    Alloy.Globals.sensimityEvent.trigger('sensimity:businessrule', businessRuleTriggerItem);
+    Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
     Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 };
@@ -94,7 +94,7 @@ const handleBeacon = (beacon, knownBeacon) => {
     beacon,
     knownBeacon: knownBeacon.toJSON(),
   };
-  Alloy.Globals.sensimityEvent.trigger('sensimity:beacon', eventItem);
+  Alloy.Globals.sensimityDispatcher.trigger('sensimity:beacon', eventItem);
   Ti.App.fireEvent('sensimity:beacon', eventItem);
 };
 
@@ -103,7 +103,7 @@ const handleBeacon = (beacon, knownBeacon) => {
  * @param proximity proximity value to check compare the distance
  * @param beaconId beacon identifier
  */
-function addFoundBeacon(proximity, beaconId) {
+const addFoundBeacon = (proximity, beaconId) => {
   foundBeacons = _.without(foundBeacons, _.findWhere(foundBeacons, {
     beaconId,
   }));
@@ -111,7 +111,7 @@ function addFoundBeacon(proximity, beaconId) {
     beaconId,
     proximity,
   });
-}
+};
 
 /**
  * Public functions
@@ -139,7 +139,7 @@ const handle = mappedBeacon => {
     const businessRules = businessRuleService.getBusinessRules(knownBeacon);
 
     // Handle every businessrule
-    _.each(businessRules, businessRule =>
+    businessRules.forEach(businessRule =>
       handleBusinessRule(businessRule, mappedBeacon, knownBeacon));
 
     // add found beacon with proximity and beacon_id
