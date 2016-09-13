@@ -21,7 +21,8 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     var self = this,
         beaconHandler = require('./../handlers/beaconHandler'),
         beaconLog = require('./../service/beaconLog'),
-        knownBeaconService = require('./../service/knownBeacons');
+        knownBeaconService = require('./../service/knownBeacons'),
+        pathsenseLib = null;
 
     /**
      * Public functions
@@ -136,12 +137,12 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     /**
      * When the hook 'getRegionsToMonitor' isn't defined, use the default scanning of geofences
      */
-    function defaultScanGeofences(pathsenseLib, geofenceBeacons) {
+    function defaultScanGeofences(pathsense, geofenceBeacons) {
         let nearestGeofenceRegions = getGeofenceRegions(geofenceBeacons);
         // Use the current position to detect the 20 nearest geofences within 7500 m
         Ti.Geolocation.getCurrentPosition((e) => {
             if (e.success) {
-                nearestGeofenceRegions = pathsenseLib.sortRegionsByDistance(nearestGeofenceRegions, {
+                nearestGeofenceRegions = pathsense.sortRegionsByDistance(nearestGeofenceRegions, {
                     latitude: e.coords.latitude,
                     longitude: e.coords.longitude,
                 }, 7500); // Detect only the nearest geofences within 7.5 km
@@ -149,7 +150,7 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
 
             // Geofence only the first 20 regions
             _.first(nearestGeofenceRegions, 20).forEach((region) => {
-                pathsenseLib.startMonitoring(region);
+                pathsense.startMonitoring(region);
             });
         });
     }
@@ -185,6 +186,7 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         const beaconsToMonitor = self.hooks.getRegionsToMonitor(knownBeacons);
         self.Beacons.stopMonitoringAllRegions();
         self.beaconRegions = [];
+        //FIXME: aren't we duplicating the beacon event listeners here in the end?
         self.startScanningAfterBinding(beaconsToMonitor);
     }
 
@@ -192,6 +194,11 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
      * Destruct the scanner
      */
     this.destruct = function () {
+        Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', updateRegionsToMonitor);
+        stopScanningGeofences();
+        if (pathsenseLib !== null) {
+            pathsenseLib.destruct();
+        }
         self.beaconRegions = [];
     };
 
@@ -217,9 +224,9 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
         if (geofenceBeacons.length === 0) {
             return;
         }
-        const pathsenseLib = require('./../scanners/pathsense');
+        pathsenseLib = require('./../scanners/pathsense');
         pathsenseLib.init();
-        stopScanningGeofences(pathsenseLib);
+        stopScanningGeofences();
         // The regions are already filtered by using the hook, so start monitoring directly
         if (_.isFunction(self.hooks.getRegionsToMonitor)) {
             scanGeofencesWithoutLocationDetection(pathsenseLib, geofenceBeacons);
@@ -230,14 +237,17 @@ var BaseScanner = function (beaconMapper, beaconRegionMapper, beaconRegionMonito
     }
 
     // Stop scanning geofences
-    function stopScanningGeofences(pathsenseLib) {
+    function stopScanningGeofences() {
+        if (pathsenseLib === null) {
+            return;
+        }
         pathsenseLib.stopMonitoring();
     }
 
-    function scanGeofencesWithoutLocationDetection(pathsenseLib, geofenceBeacons) {
+    function scanGeofencesWithoutLocationDetection(pathsense, geofenceBeacons) {
         const geofenceRegions = getGeofenceRegions(geofenceBeacons);
         geofenceRegions.forEach((region) => {
-            pathsenseLib.startMonitoring(region);
+            pathsense.startMonitoring(region);
         });
     }
 
