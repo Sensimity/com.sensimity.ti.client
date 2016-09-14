@@ -1,5 +1,4 @@
 import { Model as BeaconLogModel, Collection as BeaconLogCollection } from './../models/BeaconLog';
-import { Model as BeaconNotifiedModel, Collection as BeaconNotifiedCollection } from './../models/BeaconNotified';
 import { Model as BusinessRuleModel, Collection as BusinessRuleCollection } from './../models/BusinessRule';
 import { Model as KnownBeaconModel, Collection as KnownBeaconCollection } from './../models/KnownBeacon';
 
@@ -12,8 +11,6 @@ const createSensimityModel = (name, args) => {
   switch (name) {
   case 'BeaconLog':
     return new BeaconLogModel(args);
-  case 'BeaconNotified':
-    return new BeaconNotifiedModel(args);
   case 'BusinessRule':
     return new BusinessRuleModel(args);
   default:
@@ -30,8 +27,6 @@ const createSensimityCollection = (name, args) => {
   switch (name) {
   case 'BeaconLog':
     return new BeaconLogCollection(args);
-  case 'BeaconNotified':
-    return new BeaconNotifiedCollection(args);
   case 'BusinessRule':
     return new BusinessRuleCollection(args);
   default:
