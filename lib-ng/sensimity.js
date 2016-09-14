@@ -44,8 +44,6 @@ const start = (args, callback) =>
     ? isBLEEnabled(isEnabled => {
       const options = Object.assign({
         requireBLE: true,
-        startGeofence: true,
-        startBLE: true,
       }, args);
 
       if (!isEnabled && options.requireBLE) {
@@ -61,7 +59,7 @@ const start = (args, callback) =>
       }
 
       startScanner(Object.assign(options, {
-        startBLE: (options.startBLE && isEnabled),
+        startBLE: isEnabled,
       }));
 
       if (_.isFunction(callback)) {

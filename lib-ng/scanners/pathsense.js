@@ -2,10 +2,14 @@ import beaconMapper from '../mapper/pathsense/beacon';
 
 class Pathsense {
   constructor(beaconHandler) {
-    this.PSModule = require('com.sensimity.ti.pathsense');
-    this.beaconHandler = beaconHandler;
-    this.enteredRegion = this.enteredRegion.bind(this);
-    this.PSModule.addEventListener('enteredRegion', this.enteredRegion);
+    try {
+      this.PSModule = require('com.sensimity.ti.pathsense');
+      this.beaconHandler = beaconHandler;
+      this.enteredRegion = this.enteredRegion.bind(this);
+      this.PSModule.addEventListener('enteredRegion', this.enteredRegion);
+    } catch (e) {
+      Ti.API.warn('Could not start geofence-scan, please include the com.sensimity.ti.pathsense module');
+    }
   }
 
   enteredRegion(geofenceRegion) {
@@ -14,7 +18,9 @@ class Pathsense {
   }
 
   startMonitoring(region) {
-    this.PSModule.startMonitoringForRegion(region);
+    if (this.PSModule) {
+      this.PSModule.startMonitoringForRegion(region);
+    }
   }
 
   /**
@@ -25,11 +31,11 @@ class Pathsense {
   }
 
   stop() {
-    this.PSModule.stopMonitoringAllRegions();
+    if (this.PSModule) { this.PSModule.stopMonitoringAllRegions(); }
   }
 
   destruct() {
-    this.PSModule.removeEventListener('enteredRegion', this.enteredRegion);
+    if (this.PSModule) { this.PSModule.removeEventListener('enteredRegion', this.enteredRegion); }
   }
 }
 

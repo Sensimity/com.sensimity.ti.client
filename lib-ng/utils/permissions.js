@@ -61,7 +61,14 @@ const getBLEModule = () => {
   return require('org.beuckman.tibeacons');
 };
 
-const isBLESupported = () => getBLEModule().isBLESupported();
+const isBLESupported = () => {
+  try {
+    Ti.API.warn('Could not isBLEEnabled, please insert a BLE module');
+    return getBLEModule().isBLESupported();
+  } catch (e) {
+    return false;
+  }
+};
 
 const isBLEEnabled = callback => {
   if (!_.isFunction(callback)) {
@@ -69,7 +76,14 @@ const isBLEEnabled = callback => {
     return;
   }
 
-  const BLEModule = getBLEModule();
+  let BLEModule;
+  try {
+    BLEModule = getBLEModule();
+  } catch (e) {
+    Ti.API.warn('Could not isBLEEnabled, please insert a BLE module');
+    return;
+  }
+
   if (Ti.Platform.name === 'android') {
     callback(BLEModule.checkAvailability());
     return;

@@ -7,16 +7,16 @@ import BeaconLog from './BeaconLog';
 import { split, getNearestGeofences } from '../utils/regions';
 
 export default class ScanService {
-  constructor(options = {
-    runInService: false,
-    hooks: {},
-  }) {
-    if (_.isUndefined(options.networkId)) {
+  constructor(args = {}) {
+    if (_.isUndefined(args.networkId)) {
       Ti.API.warn('Network identifier is undefined. Can not scan');
       return;
     }
 
-    this.options = options;
+    this.options = Object.assign({
+      runInService: false,
+      hooks: {},
+    }, args);
     beaconHandler.init();
     this.beaconLog = new BeaconLog();
     this.restart = this.restart.bind(this);
@@ -27,7 +27,7 @@ export default class ScanService {
       return;
     }
 
-    knownBeaconService.refreshBeacons([options.networkId]);
+    knownBeaconService.refreshBeacons([this.options.networkId]);
   }
 
   start() {
@@ -36,7 +36,7 @@ export default class ScanService {
       this.startBLE(regions.ble);
     }
 
-    if (this.options.startGeofence && regions.geofences.length > 0) {
+    if (regions.geofences.length > 0) {
       this.startGeofence(regions.geofences);
     }
   }
