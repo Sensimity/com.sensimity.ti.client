@@ -22,7 +22,7 @@ export default class ScanService {
     this.restart = this.restart.bind(this);
     Ti.App.addEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
 
-    if (Ti.Platform.name === 'iPhone OS' && Ti.App.arguments.launchOptionsLocationKey) {
+    if (Ti.Platform.osname === 'iphone' && Ti.App.arguments.launchOptionsLocationKey) {
       // Do not refresh beacons if the app has been started based on an enter/exited region event
       return;
     }
@@ -116,10 +116,8 @@ export default class ScanService {
   }
 
   getBLEScanner() {
-    if (Ti.Platform.name === 'iPhone OS') {
-      if (!this.BLEScanner) {
-        this.BLEScanner = new Beuckman(this.beaconLog, beaconHandler);
-      }
+    if (Ti.Platform.osname === 'iphone' && !this.BLEScanner) {
+      this.BLEScanner = new Beuckman(this.beaconLog, beaconHandler);
     } else if (!this.BLEScanner) {
       this.BLEScanner = new Altbeacon(this.options.runInService, this.beaconLog, beaconHandler);
       if (_.has(this.options, 'behavior')) {

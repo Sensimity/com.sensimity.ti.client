@@ -5,7 +5,7 @@ const requestLocationPermissions = callback => {
 
   // FIXME: Always returns false on Android 6
   // https://jira.appcelerator.org/browse/TIMOB-23135
-  if (Ti.Platform.name === 'iPhone OS' && !Ti.Geolocation.locationServicesEnabled) {
+  if (Ti.Platform.osname === 'iphone' && !Ti.Geolocation.locationServicesEnabled) {
     return callback({
       success: false,
       error: 'Location services disabled',
@@ -18,7 +18,7 @@ const requestLocationPermissions = callback => {
     });
   }
 
-  if (Ti.Platform.name === 'iPhone OS') {
+  if (Ti.Platform.osname === 'iphone') {
     if (Ti.Geolocation.locationServicesAuthorization === Ti.Geolocation.AUTHORIZATION_RESTRICTED) {
       return callback({
         success: false,
