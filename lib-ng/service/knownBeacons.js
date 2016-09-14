@@ -1,7 +1,7 @@
 import { _ } from 'alloy/underscore';
-import client from './../client/client';
-import { createSensimityCollection, createSensimityModel } from './../service/base';
-import businessRuleService from './../service/businessRule';
+import client from '../client/client';
+import { createSensimityCollection, createSensimityModel } from '../utils/backbone';
+import businessRuleService from '../service/businessRule';
 
 // Get the beacons earlier retrieved from Sensimity
 const getEarlierSavedKnownBeacons = () => {

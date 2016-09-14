@@ -1,6 +1,6 @@
 import { _ } from 'alloy/underscore';
-import client from './../client/client';
-import { createSensimityCollection, createSensimityModel } from './../service/base';
+import client from '../client/client';
+import { createSensimityCollection, createSensimityModel } from '../utils/backbone';
 
 /**
  * Create a new businessrule item from the data received from Sensimity

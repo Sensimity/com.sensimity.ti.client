@@ -1,6 +1,6 @@
-import { Model as BeaconLogModel, Collection as BeaconLogCollection } from './../models/BeaconLog';
-import { Model as BusinessRuleModel, Collection as BusinessRuleCollection } from './../models/BusinessRule';
-import { Model as KnownBeaconModel, Collection as KnownBeaconCollection } from './../models/KnownBeacon';
+import { Model as BeaconLogModel, Collection as BeaconLogCollection } from '../models/BeaconLog';
+import { Model as BusinessRuleModel, Collection as BusinessRuleCollection } from '../models/BusinessRule';
+import { Model as KnownBeaconModel, Collection as KnownBeaconCollection } from '../models/KnownBeacon';
 
 /**
  * Use an Model defined in the sensimity library

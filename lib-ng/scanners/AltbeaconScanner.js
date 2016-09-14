@@ -1,5 +1,5 @@
-import BaseScanner from './../scanners/base';
-import beaconMapper from './../mapper/altbeacon/beacon';
+import BaseScanner from './BaseScanner';
+import beaconMapper from '../mapper/altbeacon/beacon';
 
 export default class AltbeaconScanner extends BaseScanner {
   constructor(runInService, beaconLog, beaconHandler) {

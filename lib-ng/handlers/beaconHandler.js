@@ -1,7 +1,7 @@
 import Alloy from 'alloy';
 import { _ } from 'alloy/underscore';
-import businessRuleService from './../service/businessRule';
-import knownBeaconService from'./../service/knownBeacons';
+import businessRuleService from '../service/businessRule';
+import knownBeaconService from'../service/knownBeacons';
 
 let foundBeacons; // Found beacons is used to handle the moving towards and moving away from business rules
 const typeOfAvailableBusinessRules = { // Types of available Business rules

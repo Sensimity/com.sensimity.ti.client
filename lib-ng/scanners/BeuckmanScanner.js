@@ -1,5 +1,5 @@
-import BaseScanner from './../scanners/base';
-import beaconMapper from './../mapper/beuckman/beacon';
+import BaseScanner from './BaseScanner';
+import beaconMapper from '../mapper/beuckman/beacon';
 
 export default class BeuckmanScanner extends BaseScanner {
   constructor(beaconLog, beaconHandler) {

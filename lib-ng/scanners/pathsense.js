@@ -1,5 +1,5 @@
 import PSModule from 'com.sensimity.ti.pathsense';
-import beaconMapper from './../mapper/pathsense/beacon';
+import beaconMapper from '../mapper/pathsense/beacon';
 
 class Pathsense {
   constructor(beaconHandler) {

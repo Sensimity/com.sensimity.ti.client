@@ -1,9 +1,9 @@
-import Altbeacon from '../scanners/altbeacon';
-import Beuckman from '../scanners/beuckman';
-import Pathsense from '../scanners/pathsense';
+import Altbeacon from '../scanners/AltbeaconScanner';
+import Beuckman from '../scanners/BeuckmanScanner';
+import Pathsense from '../scanners/Pathsense';
 import beaconHandler from '../handlers/beaconHandler';
 import knownBeaconService from './knownBeacons';
-import beaconLog from './beaconLog';
+import BeaconLog from './BeaconLog';
 import { split, getNearestGeofences } from '../utils/regions';
 
 export default class ScanService {
@@ -18,7 +18,7 @@ export default class ScanService {
 
     this.options = options;
     beaconHandler.init();
-    beaconLog.init();
+    this.beaconLog = new BeaconLog();
     this.restart = this.restart.bind(this);
     Ti.App.addEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
 
@@ -102,7 +102,8 @@ export default class ScanService {
       this.geofenceScanner = undefined;
     }
     beaconHandler.destruct();
-    beaconLog.destruct();
+    this.beaconLog.destruct();
+    this.beaconLog = undefined;
     Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
   }
 
@@ -117,10 +118,10 @@ export default class ScanService {
   getBLEScanner() {
     if (Ti.Platform.name === 'iPhone OS') {
       if (!this.BLEScanner) {
-        this.BLEScanner = new Beuckman(beaconLog, beaconHandler);
+        this.BLEScanner = new Beuckman(this.beaconLog, beaconHandler);
       }
     } else if (!this.BLEScanner) {
-      this.BLEScanner = new Altbeacon(this.options.runInService, beaconLog, beaconHandler);
+      this.BLEScanner = new Altbeacon(this.options.runInService, this.beaconLog, beaconHandler);
       if (_.has(this.options, 'behavior')) {
         this.BLEScanner.setBehavior(this.options.behavior);
       }
