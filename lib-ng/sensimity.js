@@ -25,7 +25,7 @@ if (_.isUndefined(Alloy.Globals.sensimityEvent)) {
  */
 function start(options, callback) {
     // Only start Sensimity when bluetooth is enabled
-    isBLEEnabled(function (value) {
+    isBLEEnabled(options, function (value) {
         if (!value) {
             var message = 'Sensimity scan not started because BLE not enabled';
             Ti.API.warn(message);
@@ -38,10 +38,13 @@ function start(options, callback) {
             return;
         }
 
-        if (_.isUndefined(Alloy.Globals.sensimityScanner) === false) {
-            Ti.API.warn('Scanner already defined, please destruct first before start scanning');
+        if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
+            createScanner(options);
+        }
+
+        if (Alloy.Globals.sensimityScanner.isScanning()) {
+            Ti.API.warn('Scanner already started, please stop first before start scanning');
         } else {
-            Alloy.Globals.sensimityScanner = createScanner(options);
             initScannerAndStartScanning(options);
         }
         if (_.isFunction(callback)) {
@@ -98,7 +101,7 @@ function resume() {
  */
 function runService(options, callback) {
     // Only start Sensimity when bluetooth is enabled
-    isBLEEnabled(function (value) {
+    isBLEEnabled(options, function (value) {
         if (!value) {
             var message = 'Sensimity scan not started because BLE not enabled';
             Ti.API.warn(message);
@@ -135,24 +138,18 @@ function runService(options, callback) {
     });
 }
 
-function isBLESupported() {
-    var scanner;
-    if (OS_ANDROID) {
-        scanner = require('./scanners/altbeacon')();
-    } else if (OS_IOS) {
-        scanner = require('./scanners/beuckman')();
+function isBLESupported(options) {
+    if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
+        Alloy.Globals.sensimityScanner = createScanner(options);
     }
-    return scanner.isBLESupported();
+    Alloy.Globals.sensimityScanner.isBLESupported();
 }
 
-function isBLEEnabled(callback) {
-    var scanner;
-    if (OS_ANDROID) {
-        scanner = require('./scanners/altbeacon')();
-    } else if (OS_IOS) {
-        scanner = require('./scanners/beuckman')();
+function isBLEEnabled(options, callback) {
+    if (_.isUndefined(Alloy.Globals.sensimityScanner)) {
+        Alloy.Globals.sensimityScanner = createScanner(options);
     }
-    scanner.isBLEEnabled(callback);
+    Alloy.Globals.sensimityScanner.isBLEEnabled(callback);
 }
 
 module.exports = {
