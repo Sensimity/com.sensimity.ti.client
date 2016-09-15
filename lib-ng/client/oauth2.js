@@ -43,7 +43,7 @@ const setAuth = object => {
 };
 
 // Get now
-const now = () => Math.floor(new Date().getTime() / 1000);
+const now = () => Math.floor(Date.now() / 1000);
 
 // Get access from memory or storage
 const getAccess = () => {

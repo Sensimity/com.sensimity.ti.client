@@ -45,7 +45,7 @@ export default class BeaconLog {
 
   insertBeaconLog(beacon) {
     const knownBeacon = knownBeaconService.findKnownBeacon(beacon.UUID, beacon.major, beacon.minor);
-    beacon.timestamp = Math.round(new Date().getTime() / 1000);
+    beacon.timestamp = Math.round(Date.now() / 1000);
       // If beacon = unknown, do nothing
     if (!_.isEmpty(knownBeacon)) {
       beacon.beacon_id = knownBeacon.get('beacon_id');
