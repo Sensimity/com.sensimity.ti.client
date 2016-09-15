@@ -1,124 +1,90 @@
-'use strict';
-/* Compatibility for Ti standalone (without Alloy) */
-if (typeof OS_ANDROID === "undefined") {
-    var OS_ANDROID = Ti.Platform.name === "android";
-    var OS_IOS = Ti.Platform.name === "iPhone OS";
-}
+import Alloy from 'alloy';
+import Reste from 'reste';
+import oauth2 from './oauth2';
 
-/* jshint ignore:start */
-var Alloy = require('alloy'),
-    _ = require('alloy/underscore')._,
-    Backbone = require('alloy/backbone');
-/* jshint ignore:end */
+const api = new Reste();
 
-var token,
-    expires,
-    url = "https://api.sensimity.com/",
-    reste = require("reste"),
-    api = new reste(),
-    oauth2 = require('./oauth2');
+const setApiConfig = () => {
+  const url = Alloy.CFG.sensimity.url || 'https://api.sensimity.com/';
+  api.config({
+    debug: false, // allows logging to console of ::REST:: messages
+    autoValidateParams: false, // set to true to throw errors if <param> url properties are not passed
+    timeout: 10000,
+    url,
+    requestHeaders: {
+      Accept: 'application/vnd.sensimity.v1+json',
+      'Content-Type': 'application/vnd.sensimity.v1+json',
+      Authorization: 'Bearer ' + oauth2.getAccess().token,
+    },
+    methods: [
+      {
+        name: 'getNetworks',
+        get: 'network',
+      },
+      {
+        name: 'getBeacons',
+        get: 'network/<networkId>/beacon',
+      },
+      {
+        name: 'getBusinessRules',
+        get: 'network/<networkId>/business-rule?beacon=<beaconId>',
+      },
+      {
+        name: 'getSingleBusinessRule',
+        get: 'network/<networkId>/business-rule/<businessRuleId>',
+      },
+      {
+        name: 'sendScanResults',
+        post: 'scan-results',
+      },
+    ],
+    onLoad: (e, callback) => callback(e),
+    onError: e => Ti.API.info('There was an error accessing the API > ' + JSON.stringify(e)),
+  });
+};
 
-if (!_.isUndefined(Alloy.CFG.sensimity.url)) {
-    url = Alloy.CFG.sensimity.url;
-}
+const getNetworks = callback =>
+  oauth2.init(() => {
+    setApiConfig();
+    api.getNetworks(beacons => callback(beacons));
+  });
 
-function setApiConfig() {
-    api.config({
-        debug: false, // allows logging to console of ::REST:: messages
-        autoValidateParams: false, // set to true to throw errors if <param> url properties are not passed
-        timeout: 10000,
-        url: url,
-        requestHeaders: {
-            "Accept": "application/vnd.sensimity.v1+json",
-            "Content-Type": "application/vnd.sensimity.v1+json",
-            "Authorization": "Bearer " + oauth2.getAccess().token
-        },
-        methods: [
-            {
-                name: "getNetworks",
-                get: "network"
-            },
-            {
-                name: "getBeacons",
-                get: "network/<networkId>/beacon"
-            },
-            {
-                name: "getBusinessRules",
-                get: "network/<networkId>/business-rule?beacon=<beaconId>"
-            },
-            {
-                name: "getSingleBusinessRule",
-                get: "network/<networkId>/business-rule/<businessRuleId>"
-            },
-            {
-                name: "sendScanResults",
-                post: "scan-results"
-            }
-        ],
-        onError: function(e) {
-            Ti.API.info('There was an error accessing the API > ' + JSON.stringify(e));
-        },
-        onLoad: function(e, callback) {
-            callback(e);
-        }
-    });
-}
+const getBeacons = (id, callback) =>
+  oauth2.init(() => {
+    setApiConfig();
+    api.getBeacons({networkId: id}, beacons => callback(beacons));
+  });
 
-function getNetworks(callback) {
-    oauth2.init(function() {
-        setApiConfig();
-        api.getNetworks(function (beacons) {
-            callback(beacons);
-        });
-    });
-}
+const getBusinessRules = (networkId, beaconId, callback) =>
+  oauth2.init(() => {
+    setApiConfig();
+    api.getBusinessRules({
+      networkId,
+      beaconId,
+    }, response => callback(response));
+  });
 
-function getBeacons(id, callback) {
-    oauth2.init(function() {
-        setApiConfig();
-        api.getBeacons({networkId: id}, function (beacons) {
-            callback(beacons);
-        });
-    });
-}
+const getSingleBusinessRule = (networkId, businessRuleId, callback) =>
+  oauth2.init(() => {
+    setApiConfig();
+    api.getSingleBusinessRule({
+      networkId,
+      businessRuleId,
+    }, response => callback(response));
+  });
 
-function getBusinessRules(networkId, beaconId, callback) {
-    oauth2.init(function() {
-        setApiConfig();
-        api.getBusinessRules({
-            networkId: networkId,
-            beaconId: beaconId
-        }, function (response) {
-            callback(response);
-        });
-    });
-}
+const sendScanResults = (body, callback) =>
+  oauth2.init(() => {
+    setApiConfig();
+    api.sendScanResults({
+      body,
+    }, callback);
+  });
 
-function getSingleBusinessRule(networkId, businessRuleId, callback) {
-    oauth2.init(function() {
-        setApiConfig();
-        api.getSingleBusinessRule({
-            networkId: networkId,
-            businessRuleId: businessRuleId
-        }, function (response) {
-            callback(response);
-        });
-    });
-}
-
-function sendScanResults(post, callback) {
-    oauth2.init(function() {
-        setApiConfig();
-        api.sendScanResults({
-            body: post
-        }, callback);
-    });
-}
-
-module.exports = {
-    'getNetworks': getNetworks,
-    'getBeacons': getBeacons,
-    'sendScanResults': sendScanResults,
-    'getSingleBusinessRule': getSingleBusinessRule,
-    'getBusinessRules': getBusinessRules
+export default {
+  getNetworks,
+  getBeacons,
+  sendScanResults,
+  getSingleBusinessRule,
+  getBusinessRules,
 };

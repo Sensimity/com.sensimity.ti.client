@@ -1,55 +1,46 @@
-/* jshint ignore:start */
-var Alloy = require('alloy'),
-    _ = require('alloy/underscore')._,
-    Backbone = require('alloy/backbone');
-/* jshint ignore:end */
+import Alloy from 'alloy';
 
-var model,collection;
+let model;
+let collection;
 
 exports.definition = {
-    config: {
-        columns: {
-            "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
-            "business_rule_id": "INTEGER",
-            "beacon_id": "INTEGER",
-            "type": "TEXT",
-            "interaction_id": "INTEGER",
-            "interaction_type": "TEXT",
-            "content": "TEXT"
-        },
-        adapter: {
-            db_name: "sensimity",
-            type: "sql",
-            collection_name: "BusinessRule",
-            idAttribute: "id"
-        }
+  config: {
+    columns: {
+      id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
+      business_rule_id: 'INTEGER',
+      beacon_id: 'INTEGER',
+      type: 'TEXT',
+      interaction_id: 'INTEGER',
+      interaction_type: 'TEXT',
+      content: 'TEXT',
     },
-    extendModel: function(Model) {
-        _.extend(Model.prototype, {});
-
-        return Model;
+    adapter: {
+      db_name: 'sensimity',
+      type: 'sql',
+      collection_name: 'BusinessRule',
+      idAttribute: 'id',
     },
-    extendCollection: function(Collection) {
-        _.extend(Collection.prototype, {
-            // Extend, override or implement Backbone.Collection
-            erase: function(args) {
-                var self = this;
+  },
+  extendModel: Model => (Model),
+  extendCollection: function extendCollection(Collection) {
+    _.extend(Collection.prototype, {
+    // Extend, override or implement Backbone.Collection
+      erase: function erase() {
+        const self = this;
+        const sql = `DELETE FROM ${self.config.adapter.collection_name}`;
+        const db = Ti.Database.open(self.config.adapter.db_name);
+        db.execute(sql);
+        db.close();
 
-                var sql = "DELETE FROM " + self.config.adapter.collection_name,
-                    db = Ti.Database.open(self.config.adapter.db_name);
-                db.execute(sql);
-                db.close();
-
-                self.fetch();
-            }
-        });
-
-        return Collection;
-    }
+        self.fetch();
+      },
+    });
+    return Collection;
+  },
 };
 
 // Alloy compiles models automatically to this statement. In this case the models not exists in /app/models folder, so this must be fixed by set this statements manually.
-model = Alloy.M("BusinessRule", exports.definition, []);
-collection = Alloy.C("BusinessRule", exports.definition, model);
+model = Alloy.M('BusinessRule', exports.definition, []); // eslint-disable-line
+collection = Alloy.C('BusinessRule', exports.definition, model); // eslint-disable-line
 exports.Model = model;
 exports.Collection = collection;

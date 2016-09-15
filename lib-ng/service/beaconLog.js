@@ -1,97 +1,62 @@
-/* jshint ignore:start */
-var Alloy = require('alloy'),
-    _ = require('alloy/underscore')._,
-    Backbone = require('alloy/backbone');
-/* jshint ignore:end */
+import Alloy from 'alloy';
+import { _ } from 'alloy/underscore';
+import Timer from 'ti.mely';
+import client from '../client/client';
+import { createSensimityCollection, createSensimityModel } from '../utils/backbone';
+import knownBeaconService from './knownBeacons';
 
-var sensimityClient = require('./../client/client'),
-    baseSensimityService = require('./../service/base'),
-    knownBeaconService = require('./../service/knownBeacons'),
-    timerModule = require('ti.mely');
-
-/**
- * Public functions
- */
-
-/**
- * Initialize the beaconlogservice. At initialization the beaconlogs earlier retrieved will be send to Sensimity.
- */
-function init() {
+export default class BeaconLog {
+  constructor() {
     // Send beaconlogs every 30 seconds
-    var timer = timerModule.createTimer();
-    timer.start({
-        interval: 30000
+    this.timer = Timer.createTimer();
+    this.timer.start({
+      interval: 30000,
     });
-    timer.addEventListener('onIntervalChange', sendBeaconLogs);
-    sendBeaconLogs();
-}
+    this.sendBeaconLogs = this.sendBeaconLogs.bind(this);
+    this.timer.addEventListener('onIntervalChange', this.sendBeaconLogs);
+    this.sendBeaconLogs();
+  }
 
-/**
- * Create and save a new beaconlog to send in the future to sensimity
- * @param beacon A beacon recieved by the beaconscanner
- */
-function insertBeaconLog(beacon) {
+  sendBeaconLogs() {
+    if (!Ti.Network.getOnline()) {
+      return;
+    }
+
+    const sendBeaconLogsAfterFetch = beaconLogs => {
+        // Send beaconlogs only if exists
+      if (beaconLogs.length === 0) { return; }
+      client.sendScanResults(JSON.parse(JSON.stringify({
+        instance_ref: Alloy.CFG.sensimity.instanceRef,
+        device: {
+          device_id: Ti.Platform.id,
+          model: Ti.Platform.model,
+          operating_system: Ti.Platform.osname,
+          version: Ti.Platform.version,
+        },
+        beaconLogs,
+      })), this.destroyBeaconLogs);
+    };
+
+    const library = createSensimityCollection('BeaconLog');
+    library.fetch({
+      success: sendBeaconLogsAfterFetch, // eslint-disable-line
+    });
+  }
+
+  insertBeaconLog(beacon) {
     const timestamp = Math.round(new Date().getTime() / 1000);
     const knownBeacon = knownBeaconService.findKnownBeacon(beacon.UUID, beacon.major, beacon.minor);
     beacon.timestamp = timestamp;
-    // If beacon = unknown, do nothing
+      // If beacon = unknown, do nothing
     if (!_.isEmpty(knownBeacon)) {
-        beacon.beacon_id = knownBeacon.get('beacon_id');
+      beacon.beacon_id = knownBeacon.get('beacon_id');
     }
-    const beaconLog = baseSensimityService.createSensimityModel('BeaconLog', beacon);
+    const beaconLog = createSensimityModel('BeaconLog', beacon);
     beaconLog.save();
-}
+  }
 
-exports.init = init;
-exports.insertBeaconLog = insertBeaconLog;
-
-/**
- * Send the beacons to Sensimity
- */
-function sendBeaconLogs() {
-    if (Ti.Network.getOnline()) {
-        var library = baseSensimityService.createSensimityCollection('BeaconLog');
-        library.fetch({
-            success: sendBeaconLogsAfterFetch
-        });
-    }
-}
-
-/**
- * Send the beaconlogs to the SensimityAPI after fetching from the local database. Only send when beaconlogs are available.
- * @param beaconLogs The beaconLogs received
- */
-function sendBeaconLogsAfterFetch(beaconLogs) {
-    // Send beaconlogs only if exists
-    if (beaconLogs.length !== 0) {
-        sensimityClient.sendScanResults(JSON.parse(JSON.stringify(createBeaconLogsCollection(beaconLogs))), destroyBeaconLogs);
-    }
-}
-
-/**
- * Create an beaconlogs collection. A instanceref is required to send beaconlogs.
- * @param beaconLogs The beaconlogs which will be send to the SensimityAPI.
- * @returns {{instance_ref: (exports.sensimity.instanceRef|*), device: {device_id: String, model: String, operating_system: String, version: String}, beaconLogs: *}}
- */
-function createBeaconLogsCollection(beaconLogs) {
-    var instanceRef = Alloy.CFG.sensimity.instanceRef;
-    return {
-        instance_ref: instanceRef,
-        device: {
-            device_id: Ti.Platform.id,
-            model: Ti.Platform.model,
-            operating_system: Ti.Platform.osname,
-            version: Ti.Platform.version
-        },
-        beaconLogs: beaconLogs
-    };
-}
-
-/**
- * Destroy the beaconlogs from local database
- */
-function destroyBeaconLogs() {
-    var collection = baseSensimityService.createSensimityCollection('BeaconLog');
+  destroyBeaconLogs() {
+    const collection = createSensimityCollection('BeaconLog');
     collection.erase();
+  }
 }
-
