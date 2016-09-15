@@ -1,5 +1,6 @@
 import BaseScanner from './BaseScanner';
 import mapper from '../mapper/altbeacon';
+import sensimityConfig from '../config/config';
 
 export default class AltbeaconScanner extends BaseScanner {
   constructor(runInService, beaconLog, beaconHandler) {
@@ -59,7 +60,7 @@ export default class AltbeaconScanner extends BaseScanner {
   }
 
   enterRegion(param) {
-    if (this.Beacons) {
+    if (this.Beacons && sensimityConfig.monitoringScope === 'minor') {
       this.beaconHandler.handle(mapper.region(param), 'enterregion');
     }
   }

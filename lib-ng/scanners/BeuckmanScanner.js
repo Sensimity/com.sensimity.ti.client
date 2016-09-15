@@ -1,5 +1,6 @@
 import BaseScanner from './BaseScanner';
 import mapper from '../mapper/beuckman';
+import sensimityConfig from '../config/config';
 
 export default class BeuckmanScanner extends BaseScanner {
   constructor(beaconLog, beaconHandler) {
@@ -23,7 +24,9 @@ export default class BeuckmanScanner extends BaseScanner {
   // Start ranging beacons when a beaconregion is detected
   enterRegion(param) {
     if (this.Beacons) {
-      this.beaconHandler.handle(mapper.region(param), 'enterregion');
+      if (sensimityConfig.monitoringScope === 'minor') {
+        this.beaconHandler.handle(mapper.region(param), 'enterregion');
+      }
       this.Beacons.startRangingForBeacons(param);
     }
   }
