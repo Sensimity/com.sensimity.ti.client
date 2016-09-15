@@ -1,4 +1,4 @@
-import beaconMapper from '../mapper/pathsense/beacon';
+import mapper from '../mapper/pathsense';
 
 class Pathsense {
   constructor(beaconHandler) {
@@ -13,7 +13,7 @@ class Pathsense {
   }
 
   enteredRegion(geofenceRegion) {
-    const beacon = beaconMapper.map(geofenceRegion);
+    const beacon = mapper.region(geofenceRegion);
     this.beaconHandler.handle(beacon);
   }
 

@@ -1,6 +1,8 @@
+import sensimityConfig from '../config/config';
+
 export default class BaseScanner {
-  constructor(beaconMapper, beaconLog = null, beaconHandler = null) {
-    this.beaconMapper = beaconMapper;
+  constructor(mapper, beaconLog = null, beaconHandler = null) {
+    this.mapper = mapper;
     this.setBeaconLog(beaconLog);
     this.setBeaconHandler(beaconHandler);
   }
@@ -24,8 +26,10 @@ export default class BaseScanner {
   beaconFound(beaconRaw) {
     if (_.isUndefined(beaconRaw.rssi) || parseInt(beaconRaw.rssi, 10) === 0) { return; }
 
-    const beacon = this.beaconMapper.map(beaconRaw);
+    const beacon = this.mapper.beacon(beaconRaw);
     this.beaconLog.insertBeaconLog(beacon);
-    this.beaconHandler.handle(beacon);
+    if (sensimityConfig.ranging) {
+      this.beaconHandler.handle(beacon);
+    }
   }
 }

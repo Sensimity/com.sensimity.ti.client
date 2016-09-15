@@ -1,9 +1,9 @@
 import BaseScanner from './BaseScanner';
-import beaconMapper from '../mapper/altbeacon/beacon';
+import mapper from '../mapper/altbeacon';
 
 export default class AltbeaconScanner extends BaseScanner {
   constructor(runInService, beaconLog, beaconHandler) {
-    super(beaconMapper, beaconLog, beaconHandler);
+    super(mapper, beaconLog, beaconHandler);
     try {
       this.Beacons = require('com.drtech.altbeacon');
       this.scanPeriods = {
@@ -22,6 +22,7 @@ export default class AltbeaconScanner extends BaseScanner {
       };
       this.runInService = runInService;
       this.beaconFound = this.beaconFound.bind(this);
+      this.enterRegion = this.enterRegion.bind(this);
       this.addAllEventListeners();
     } catch (e) {
       Ti.API.warn('Could not start BLE-scan, please include the com.drtech.altbeacon module');
@@ -46,10 +47,7 @@ export default class AltbeaconScanner extends BaseScanner {
 
   startMonitoring(region) {
     if (this.Beacons) {
-      this.Beacons.startMonitoringForRegion({
-        uuid: region.UUID,
-        identifier: region.identifier,
-      });
+      this.Beacons.startMonitoringForRegion(region);
     }
   }
 
@@ -60,12 +58,24 @@ export default class AltbeaconScanner extends BaseScanner {
     }
   }
 
+  enterRegion(param) {
+    if (this.Beacons) {
+      this.beaconHandler.handle(mapper.region(param), 'enterregion');
+    }
+  }
+
   addAllEventListeners() {
-    if (this.Beacons) { this.Beacons.addEventListener('beaconProximity', this.beaconFound); }
+    if (this.Beacons) {
+      this.Beacons.addEventListener('beaconProximity', this.beaconFound);
+      this.Beacons.addEventListener('enteredRegion', this.enterRegion);
+    }
   }
 
   removeAllEventListeners() {
-    if (this.Beacons) { this.Beacons.removeEventListener('beaconProximity', this.beaconFound); }
+    if (this.Beacons) {
+      this.Beacons.removeEventListener('beaconProximity', this.beaconFound);
+      this.Beacons.removeEventListener('enteredRegion', this.enterRegion);
+    }
   }
 
   setBackgroundMode(value) {

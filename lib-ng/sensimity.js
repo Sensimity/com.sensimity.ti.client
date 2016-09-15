@@ -4,6 +4,7 @@ import knownBeaconService from './service/knownBeacons';
 import Scan from './service/ScanService';
 import { isBLEEnabled, isBLESupported, requestLocationPermissions } from './utils/permissions';
 import dispatcher from './utils/dispatcher';
+import sensimityConfig from './config/config';
 
 if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
   Alloy.Globals.sensimityDispatcher = dispatcher();
@@ -126,12 +127,12 @@ const runService = (options, callback) =>
       return;
     }
 
-    if (Ti.Platform.name !== 'android' || _.isUndefined(Alloy.CFG.sensimity.backgroundService)) {
+    if (Ti.Platform.name !== 'android' || _.isUndefined(sensimityConfig.backgroundService)) {
       return;
     }
 
     const intent = Ti.Android.createServiceIntent({
-      url: Alloy.CFG.sensimity.backgroundService,
+      url: sensimityConfig.backgroundService,
       startMode: Ti.Android.START_REDELIVER_INTENT,
     });
 

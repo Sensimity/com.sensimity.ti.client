@@ -1,3 +1,5 @@
+import sensimityConfig from '../config/config';
+
 const getGeofenceRegions = beacons => _.uniq(
   beacons.map(beacon => ({
     identifier: `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`,
@@ -8,10 +10,28 @@ const getGeofenceRegions = beacons => _.uniq(
 , false, beacon => beacon.identifier);
 
 const getBLERegions = beacons => _.uniq(
-  beacons.map(beacon => ({
-    identifier: beacon.get('UUID'),
-    UUID: beacon.get('UUID'),
-  }))
+  beacons.map(beacon => {
+    switch (sensimityConfig.monitoringScope) {
+    case 'minor':
+      return {
+        identifier: `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`,
+        uuid: beacon.get('UUID'),
+        major: beacon.get('major'),
+        minor: beacon.get('minor'),
+      };
+    case 'major':
+      return {
+        identifier: `${beacon.get('UUID')}|${beacon.get('major')}}`,
+        uuid: beacon.get('UUID'),
+        major: beacon.get('major'),
+      };
+    default:
+      return {
+        identifier: beacon.get('UUID'),
+        uuid: beacon.get('UUID'),
+      };
+    }
+  })
 , false, beacon => beacon.identifier);
 
 // Use the current position to detect the 20 nearest geofences within 7500 m

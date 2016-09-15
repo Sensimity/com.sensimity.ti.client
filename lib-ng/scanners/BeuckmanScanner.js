@@ -1,9 +1,9 @@
 import BaseScanner from './BaseScanner';
-import beaconMapper from '../mapper/beuckman/beacon';
+import mapper from '../mapper/beuckman';
 
 export default class BeuckmanScanner extends BaseScanner {
   constructor(beaconLog, beaconHandler) {
-    super(beaconMapper, beaconLog, beaconHandler);
+    super(mapper, beaconLog, beaconHandler);
     try {
       this.Beacons = require('org.beuckman.tibeacons');
       this.beaconRangerHandler = this.beaconRangerHandler.bind(this);
@@ -16,16 +16,14 @@ export default class BeuckmanScanner extends BaseScanner {
 
   startMonitoring(region) {
     if (this.Beacons) {
-      this.Beacons.startMonitoringForRegion({
-        uuid: region.UUID,
-        identifier: region.identifier,
-      });
+      this.Beacons.startMonitoringForRegion(region);
     }
   }
 
   // Start ranging beacons when a beaconregion is detected
   enterRegion(param) {
     if (this.Beacons) {
+      this.beaconHandler.handle(mapper.region(param), 'enterregion');
       this.Beacons.startRangingForBeacons(param);
     }
   }
@@ -48,9 +46,9 @@ export default class BeuckmanScanner extends BaseScanner {
     }
 
     if (e.regionState === 'inside') {
-      this.Beacons.startRangingForBeacons(_.pick(e, 'uuid', 'identifier'));
+      this.enterRegion(e);
     } else if (e.regionState === 'outside') {
-      this.Beacons.stopRangingForBeacons(_.pick(e, 'uuid', 'identifier'));
+      this.exitRegion(e);
     }
   }
 

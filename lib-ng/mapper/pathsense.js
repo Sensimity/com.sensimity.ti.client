@@ -1,4 +1,4 @@
-const map = geofenceRegion => {
+const region = geofenceRegion => {
   const beaconRaw = geofenceRegion.identifier.split('|');
 
   return {
@@ -11,4 +11,4 @@ const map = geofenceRegion => {
   };
 };
 
-export default { map };
+export default { region };
