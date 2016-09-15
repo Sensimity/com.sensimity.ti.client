@@ -35,43 +35,31 @@ const startScanner = options => {
 
 const permissionsCheck = (args, callback, boot) =>
   // Only start Sensimity when bluetooth is enabled
-  requestLocationPermissions(
-    (e) => e.success
-    ? isBLEEnabled(isEnabled => {
-      const options = Object.assign({
-        requireBLE: true,
-      }, args);
+  requestLocationPermissions(e => e.success
+    ? isBLEEnabled(scanBLE => {
+      const options = {
+        scanBLE,
+        scanGeofence: args.scanGeofence || true,
+      };
 
-      if (!isEnabled && options.requireBLE) {
-        const message = 'Sensimity scan not started because BLE not enabled';
-        Ti.API.warn(message);
-        if (_.isFunction(callback)) {
-          callback({
-            success: false,
-            message,
-          });
-        }
-        return;
-      }
-
-      boot(Object.assign({
-        startBLE: isEnabled,
-      }, options));
+      boot(Object.assign(args, options));
 
       if (_.isFunction(callback)) {
         callback({
-          success: true,
-          message: 'Sensimity successfully started',
+          success: {
+            ble: scanBLE,
+            geofence: options.scanGeofence,
+          },
         });
       }
     })
     : () => {
-      const message = 'Sensimity scan not started because locationservices are enabled';
-      Ti.API.warn(message);
       if (_.isFunction(callback)) {
         callback({
-          success: false,
-          message,
+          success: {
+            ble: false,
+            geofence: false,
+          },
         });
       }
     });

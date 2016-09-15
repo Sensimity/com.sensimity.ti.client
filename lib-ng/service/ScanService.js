@@ -32,11 +32,11 @@ export default class ScanService {
 
   start() {
     const regions = this.getRegions();
-    if (this.options.startBLE && regions.ble.length > 0) {
+    if (this.options.scanBLE && regions.ble.length > 0) {
       this.startBLE(regions.ble);
     }
 
-    if (regions.geofences.length > 0) {
+    if (this.options.scanGeofence && regions.geofences.length > 0) {
       this.startGeofence(regions.geofences);
     }
   }
