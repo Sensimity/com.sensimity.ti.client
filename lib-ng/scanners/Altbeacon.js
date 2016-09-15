@@ -23,7 +23,7 @@ export default class Altbeacon extends BaseScanner {
       this.runInService = runInService;
       this.addAllEventListeners();
     } catch (e) {
-      Ti.API.warn('Could not start BLE-scan, please include the com.drtech.altbeacon module');
+      Ti.API.info('Could not start BLE-scan, please include the com.drtech.altbeacon module');
     }
   }
 

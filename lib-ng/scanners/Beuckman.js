@@ -10,7 +10,7 @@ export default class Beuckman extends BaseScanner {
       this.rangedBeacons = this.rangedBeacons.bind(this);
       this.addAllEventListeners();
     } catch (e) {
-      Ti.API.warn('Could not start BLE-scan, please include the org.beuckman.tibeacons module');
+      Ti.API.info('Could not start BLE-scan, please include the org.beuckman.tibeacons module');
     }
   }
 

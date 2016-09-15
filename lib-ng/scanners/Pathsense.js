@@ -9,7 +9,7 @@ export default class Pathsense extends BaseScanner {
       this.Pathsense.addEventListener('enteredRegion', this.enteredRegion);
       this.Pathsense.addEventListener('exitedRegion', this.exitedRegion);
     } catch (e) {
-      Ti.API.warn('Could not start geofence-scan, please include the com.sensimity.ti.pathsense module');
+      Ti.API.info('Could not start geofence-scan, please include the com.sensimity.ti.pathsense module');
     }
   }
 
