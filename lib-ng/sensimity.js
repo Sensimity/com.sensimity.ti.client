@@ -4,6 +4,7 @@ import knownBeaconService from './service/knownBeacons';
 import Scan from './service/ScanService';
 import { isBLEEnabled, isBLESupported, requestLocationPermissions } from './utils/permissions';
 import dispatcher from './utils/dispatcher';
+import sensimityConfig from './config/config';
 
 if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
   Alloy.Globals.sensimityDispatcher = dispatcher();
@@ -23,7 +24,7 @@ const startScanner = options => {
   }
 
   let scanOptions = options;
-  if (Ti.Platform.name === 'android') {
+  if (Ti.Platform.osname === 'android') {
     scanOptions = Object.assign(options, { runInService: options.runInService || false });
   }
 
@@ -32,12 +33,7 @@ const startScanner = options => {
   Alloy.Globals.sensimityScan.start();
 };
 
-/**
- * Initialize the scanner and start scanning on added network identifier
- * @param options {network_id: <network identifier to scan beacons>}
- * @param callback Callback to inform about the start of sensimity {success: <bool>, message: <string>}
- */
-const start = (args, callback) =>
+const permissionsCheck = (args, callback, boot) =>
   // Only start Sensimity when bluetooth is enabled
   requestLocationPermissions(
     (e) => e.success
@@ -58,9 +54,9 @@ const start = (args, callback) =>
         return;
       }
 
-      startScanner(Object.assign(options, {
+      boot(Object.assign({
         startBLE: isEnabled,
-      }));
+      }, options));
 
       if (_.isFunction(callback)) {
         callback({
@@ -81,6 +77,34 @@ const start = (args, callback) =>
     });
 
 /**
+ * Initialize the scanner and start scanning on added network identifier
+ * @param options {network_id: <network identifier to scan beacons>}
+ * @param callback Callback to inform about the start of sensimity {success: <bool>, message: <string>}
+ */
+const start = (args, callback) => permissionsCheck(args, callback, options => startScanner(options));
+
+/**
+ * Start background intent for Android
+ * @param callback Callback to inform about the start of sensimity {success: <bool>, message: <string>}
+ */
+const runService = (args, callback) => permissionsCheck(args, callback, () => {
+  const intent = Ti.Android.createServiceIntent({
+    url: sensimityConfig.backgroundService,
+    startMode: Ti.Android.START_REDELIVER_INTENT,
+  });
+
+  if (_.isNumber(args.networkId)) {
+    intent.putExtra('networkId', args.networkId);
+  }
+
+  if (Ti.Android.isServiceRunning(intent)) {
+    Ti.Android.stopService(intent);
+  }
+
+  Ti.Android.startService(intent);
+});
+
+/**
  * Stop scanning
  */
 const stop = () => {
@@ -92,7 +116,7 @@ const stop = () => {
 };
 
 const pause = () => {
-  if (Ti.Platform.name !== 'android' || _.isUndefined(Alloy.Globals.sensimityScan)) {
+  if (Ti.Platform.osname !== 'android' || _.isUndefined(Alloy.Globals.sensimityScan)) {
     return;
   }
 
@@ -100,57 +124,12 @@ const pause = () => {
 };
 
 const resume = () => {
-  if (Ti.Platform.name !== 'android' || _.isUndefined(Alloy.Globals.sensimityScan)) {
+  if (Ti.Platform.osname !== 'android' || _.isUndefined(Alloy.Globals.sensimityScan)) {
     return;
   }
 
   Alloy.Globals.sensimityScan.setBackgroundMode(false);
 };
-
-/**
- * Start background intent for Android
- * @param callback Callback to inform about the start of sensimity {success: <bool>, message: <string>}
- */
-const runService = (options, callback) =>
-    // Only start Sensimity when bluetooth is enabled
-  isBLEEnabled(isEnabled => {
-    if (!isEnabled) {
-      const message = 'Sensimity scan not started because BLE not enabled';
-      Ti.API.warn(message);
-      if (_.isFunction(callback)) {
-        callback({
-          success: false,
-          message,
-        });
-      }
-      return;
-    }
-
-    if (Ti.Platform.name !== 'android' || _.isUndefined(Alloy.CFG.sensimity.backgroundService)) {
-      return;
-    }
-
-    const intent = Ti.Android.createServiceIntent({
-      url: Alloy.CFG.sensimity.backgroundService,
-      startMode: Ti.Android.START_REDELIVER_INTENT,
-    });
-
-    if (_.isNumber(options.networkId)) {
-      intent.putExtra('networkId', options.networkId);
-    }
-
-    if (Ti.Android.isServiceRunning(intent)) {
-      Ti.Android.stopService(intent);
-    }
-
-    Ti.Android.startService(intent);
-    if (_.isFunction(callback)) {
-      callback({
-        success: true,
-        message: 'Sensimity successfully started in a Android service',
-      });
-    }
-  });
 
 const getKnownBeacons = knownBeaconService.getKnownBeacons;
 export {

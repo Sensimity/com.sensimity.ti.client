@@ -89,10 +89,11 @@ const handleBusinessRule = (businessRule, beacon, knownBeacon) => {
  * @param beacon
  * @param knownBeacon
  */
-const handleBeacon = (beacon, knownBeacon) => {
+const handleBeacon = ({ beacon, knownBeacon, type }) => {
   const eventItem = {
     beacon,
     knownBeacon: knownBeacon.toJSON(),
+    type,
   };
   Alloy.Globals.sensimityDispatcher.trigger('sensimity:beacon', eventItem);
   Ti.App.fireEvent('sensimity:beacon', eventItem);
@@ -128,12 +129,16 @@ const init = () => {
  * This function must be called when the beaconscanner founds a beacon. It checks beacon exists in the system and search for the appropiate business rule(s).
  * @param mappedBeacon Mapped beacon is a found beacon in the base scanner
  */
-const handle = mappedBeacon => {
+const handle = (mappedBeacon, type = 'ranging') => {
   const knownBeacon = knownBeaconService.findKnownBeacon(mappedBeacon.UUID, mappedBeacon.major, mappedBeacon.minor);
     // If beacon = unknown, do nothing
   if (!_.isEmpty(knownBeacon)) {
     // Trigger a 'beacon found' event
-    handleBeacon(mappedBeacon, knownBeacon);
+    handleBeacon({ mappedBeacon, knownBeacon, type });
+
+    if (type !== 'ranging') {
+      return;
+    }
 
     // Find appropiate business rules
     const businessRules = businessRuleService.getBusinessRules(knownBeacon);

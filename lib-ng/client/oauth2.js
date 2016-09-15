@@ -1,13 +1,13 @@
-import Alloy from 'alloy';
 import { _ } from 'alloy/underscore';
 import Reste from 'reste';
+import sensimityConfig from '../config/config';
 
 const basicAuthHeader =
-  Ti.Utils.base64encode(`${Alloy.CFG.sensimity.basicHeaderAuthUsername}:${Alloy.CFG.sensimity.basicHeaderAuthPassword}`).toString();
+  Ti.Utils.base64encode(`${sensimityConfig.basicHeaderAuthUsername}:${sensimityConfig.basicHeaderAuthPassword}`).toString();
 const api = new Reste();
 let access = {};
 
-const url = Alloy.CFG.sensimity.url || 'https://api.sensimity.com/';
+const url = sensimityConfig.url || 'https://api.sensimity.com/';
 api.config({
   debug: false, // allows logging to console of ::REST:: messages
   autoValidateParams: false, // set to true to throw errors if <param> url properties are not passed
@@ -43,7 +43,7 @@ const setAuth = object => {
 };
 
 // Get now
-const now = () => Math.floor(new Date().getTime() / 1000);
+const now = () => Math.floor(Date.now() / 1000);
 
 // Get access from memory or storage
 const getAccess = () => {
@@ -96,8 +96,8 @@ const refreshAccessToken = successCallback => {
     body.refresh_token = getAuth().refreshToken;
     body.grant_type = 'refresh_token';
   } else {
-    body.username = Alloy.CFG.sensimity.username;
-    body.password = Alloy.CFG.sensimity.password;
+    body.username = sensimityConfig.username;
+    body.password = sensimityConfig.password;
     body.grant_type = 'password';
   }
 

@@ -1,11 +1,11 @@
-import Alloy from 'alloy';
 import Reste from 'reste';
 import oauth2 from './oauth2';
+import sensimityConfig from '../config/config';
 
 const api = new Reste();
 
 const setApiConfig = () => {
-  const url = Alloy.CFG.sensimity.url || 'https://api.sensimity.com/';
+  const url = sensimityConfig.url || 'https://api.sensimity.com/';
   api.config({
     debug: false, // allows logging to console of ::REST:: messages
     autoValidateParams: false, // set to true to throw errors if <param> url properties are not passed

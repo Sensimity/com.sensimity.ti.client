@@ -1,4 +1,4 @@
-import Alloy from 'alloy';
+import sensimityConfig from '../config/config';
 import { _ } from 'alloy/underscore';
 import Timer from 'ti.mely';
 import client from '../client/client';
@@ -25,16 +25,16 @@ export default class BeaconLog {
     const sendBeaconLogsAfterFetch = beaconLogs => {
         // Send beaconlogs only if exists
       if (beaconLogs.length === 0) { return; }
-      client.sendScanResults(JSON.parse(JSON.stringify({
-        instance_ref: Alloy.CFG.sensimity.instanceRef,
+      client.sendScanResults({
+        instance_ref: sensimityConfig.instanceRef,
         device: {
           device_id: Ti.Platform.id,
           model: Ti.Platform.model,
           operating_system: Ti.Platform.osname,
           version: Ti.Platform.version,
         },
-        beaconLogs,
-      })), this.destroyBeaconLogs);
+        beaconLogs: beaconLogs.toJSON(),
+      }, this.destroyBeaconLogs);
     };
 
     const library = createSensimityCollection('BeaconLog');
@@ -44,9 +44,8 @@ export default class BeaconLog {
   }
 
   insertBeaconLog(beacon) {
-    const timestamp = Math.round(new Date().getTime() / 1000);
     const knownBeacon = knownBeaconService.findKnownBeacon(beacon.UUID, beacon.major, beacon.minor);
-    beacon.timestamp = timestamp;
+    beacon.timestamp = Math.round(Date.now() / 1000);
       // If beacon = unknown, do nothing
     if (!_.isEmpty(knownBeacon)) {
       beacon.beacon_id = knownBeacon.get('beacon_id');
