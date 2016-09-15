@@ -1,5 +1,5 @@
-import Altbeacon from '../scanners/AltbeaconScanner';
-import Beuckman from '../scanners/BeuckmanScanner';
+import Altbeacon from '../scanners/Altbeacon';
+import Beuckman from '../scanners/Beuckman';
 import Pathsense from '../scanners/Pathsense';
 import beaconHandler from '../handlers/beaconHandler';
 import knownBeaconService from './knownBeacons';
@@ -81,7 +81,7 @@ export default class ScanService {
   }
 
   setBackgroundMode(bgMode) {
-    if (Ti.Platform.name === 'android' && this.BLEScanner) {
+    if (Ti.Platform.osname === 'android' && this.BLEScanner) {
       this.BLEScanner.setBackgroundMode(bgMode);
     }
   }

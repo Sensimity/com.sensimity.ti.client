@@ -5,6 +5,9 @@ export default class BaseScanner {
     this.mapper = mapper;
     this.setBeaconLog(beaconLog);
     this.setBeaconHandler(beaconHandler);
+    this.enteredRegion = this.enteredRegion.bind(this);
+    this.exitedRegion = this.exitedRegion.bind(this);
+    this.beaconFound = this.beaconFound.bind(this);
   }
 
   destruct() {
@@ -17,6 +20,14 @@ export default class BaseScanner {
 
   setBeaconHandler(beaconHandler) {
     this.beaconHandler = beaconHandler;
+  }
+
+  enteredRegion(param) {
+    this.beaconHandler.handle(this.mapper.region(param), 'enterregion');
+  }
+
+  exitedRegion(param) {
+    this.beaconHandler.handle(this.mapper.region(param), 'exitregion');
   }
 
   /**

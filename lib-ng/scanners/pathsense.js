@@ -1,25 +1,27 @@
+import BaseScanner from './Base';
 import mapper from '../mapper/pathsense';
 
-class Pathsense {
+export default class Pathsense extends BaseScanner {
   constructor(beaconHandler) {
+    super(mapper, null, beaconHandler);
     try {
-      this.PSModule = require('com.sensimity.ti.pathsense');
-      this.beaconHandler = beaconHandler;
-      this.enteredRegion = this.enteredRegion.bind(this);
-      this.PSModule.addEventListener('enteredRegion', this.enteredRegion);
+      this.Pathsense = require('com.sensimity.ti.pathsense');
+      this.Pathsense.addEventListener('enteredRegion', this.enteredRegion);
+      this.Pathsense.addEventListener('exitedRegion', this.exitedRegion);
     } catch (e) {
       Ti.API.warn('Could not start geofence-scan, please include the com.sensimity.ti.pathsense module');
     }
   }
 
-  enteredRegion(geofenceRegion) {
-    const beacon = mapper.region(geofenceRegion);
-    this.beaconHandler.handle(beacon);
+  startMonitoring(region) {
+    if (this.Pathsense) {
+      this.Pathsense.startMonitoringForRegion(region);
+    }
   }
 
-  startMonitoring(region) {
-    if (this.PSModule) {
-      this.PSModule.startMonitoringForRegion(region);
+  stop() {
+    if (this.Pathsense) {
+      this.Pathsense.stopMonitoringAllRegions();
     }
   }
 
@@ -27,15 +29,14 @@ class Pathsense {
   * Sort geofence-regions by distance inside a defined radius from a predefined location.
   */
   sortRegionsByDistance(regions, location, defaultRadius = 5000) {
-    return this.PSModule.sortRegionsByDistance(regions, location, defaultRadius);
-  }
-
-  stop() {
-    if (this.PSModule) { this.PSModule.stopMonitoringAllRegions(); }
+    return this.Pathsense.sortRegionsByDistance(regions, location, defaultRadius);
   }
 
   destruct() {
-    if (this.PSModule) { this.PSModule.removeEventListener('enteredRegion', this.enteredRegion); }
+    if (this.Pathsense) {
+      this.Pathsense.removeEventListener('enteredRegion', this.enteredRegion);
+      this.Pathsense.removeEventListener('exitedRegion', this.exitedRegion);
+    }
   }
 }
 

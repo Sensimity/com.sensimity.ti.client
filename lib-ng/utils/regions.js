@@ -2,7 +2,7 @@ import sensimityConfig from '../config/config';
 
 const getGeofenceRegions = beacons => _.uniq(
   beacons.map(beacon => ({
-    identifier: `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`,
+    identifier: `${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}|${beacon.get('beacon_id')}`,
     latitude: beacon.get('latitude'),
     longitude: beacon.get('longitude'),
     radius: 100,
@@ -14,7 +14,7 @@ const getBLERegions = beacons => _.uniq(
     switch (sensimityConfig.monitoringScope) {
     case 'minor':
       return {
-        identifier: `${beacon.get('beacon_id')}|${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}`,
+        identifier: `${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}|${beacon.get('beacon_id')}`,
         uuid: beacon.get('UUID'),
         major: beacon.get('major'),
         minor: beacon.get('minor'),
