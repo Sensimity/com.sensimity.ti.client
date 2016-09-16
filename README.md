@@ -12,12 +12,12 @@ To use this module it's necessary to use the Sensimity forks of two Appcelerator
 - Optionally we can also provide the geofence module on request.
 
 ## Install
-The installation- and configuration description is optimized for using by the [Titanium Alloy framework](https://github.com/appcelerator/alloy).
+The installation- and configuration description is optimized for usage via the [Titanium Alloy framework](https://github.com/appcelerator/alloy).
 
 1. Download the Sensimity client from the dist folder and copy it into the `modules/commonjs` directory.
 2. Add the following modules to the `modules` folder:
     * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.5.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.5.0/android/dist/com.drtech.altbeacon-android-1.5.0.zip)
-    * iOS: [Sensimity TiBeacons module](https://github.com/jbeuckm/TiBeacons/blob/master/org.beuckman.tibeacons-iphone-0.10.0.zip)
+    * iOS: [Sensimity TiBeacons module](https://github.com/Sensimity/TiBeacons/blob/master/org.beuckman.tibeacons-iphone-0.12.0.zip)
 3. Add the dependencies into the `modules` directory, used for the connection with the Sensimity-API and to send statistics to Sensimity:
     * Android/iOS: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
     * Android: [ti.mely-android-0.1](https://github.com/benbahrenburg/ti.mely/blob/master/Android/dist/ti.mely-android-0.1.zip)
