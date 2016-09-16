@@ -93,7 +93,7 @@ const handleBeacon = ({ beacon, knownBeacon, type }) => {
   const eventItem = {
     beacon,
     knownBeacon: knownBeacon.toJSON(),
-    type,
+    eventType: type,
   };
   Alloy.Globals.sensimityDispatcher.trigger('sensimity:beacon', eventItem);
   Ti.App.fireEvent('sensimity:beacon', eventItem);
