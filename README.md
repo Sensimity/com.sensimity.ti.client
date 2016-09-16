@@ -182,7 +182,7 @@ To handle the triggered Business Rules and to handle the detected iBeacons, use 
         e = {
             beacon: <Detected beacon data>,
             knownBeacon: <Beacon known from Sensimity>,
-            type: <enterregion|exitregion|ranging>
+            eventType: <enterregion|exitregion|ranging>
         };
     });
     ```
