@@ -1,21 +1,22 @@
 # Sensimity Appcelerator client
 Client implementation for communication with the Sensimity platform (http://sensimity.com)
 
-  - Get the beacon-networks and beacons from the sensimity-API (see also http://sensimity.github.io/docs/)
-  - Scan for beacons within a defined Sensimity network
-  - Handle beacon and beacon-business-rules (defined in Sensimity Dashboard)
+  - Get the networks and beacons/geofences from the sensimity-API (see also http://sensimity.github.io/docs/)
+  - Scan for beacons/geofences within a defined Sensimity network
+  - Handle beacon/geofences and business-rules (defined in Sensimity Dashboard)
 
 ## Notes
-To use this module it's necessary to use the special Sensimity-forks of two Appcelerator Titanium modules:
-- Android: [https://github.com/Sensimity/android-altbeacon-module](https://github.com/Sensimity/android-altbeacon-module/tree/1.4.0).
-- iOS: [https://github.com/Sensimity/TiBeacons](https://github.com/Sensimity/TiBeacons/tree/0.10.0).
+To use this module it's necessary to use the Sensimity forks of two Appcelerator Titanium modules. The original ones are outdated and seem unmaintained.
+- Android: [https://github.com/Sensimity/android-altbeacon-module](https://github.com/Sensimity/android-altbeacon-module/tree/1.5.0).
+- iOS: [https://github.com/Sensimity/TiBeacons](https://github.com/Sensimity/TiBeacons/tree/0.12.0).
+- Optionally we can also provide the geofence module on request.
 
 ## Install
-The installation- and configurationdescription is optimized for using by the [Titanium Alloy framework](https://github.com/appcelerator/alloy).
+The installation- and configuration description is optimized for using by the [Titanium Alloy framework](https://github.com/appcelerator/alloy).
 
 1. Download the Sensimity client from the dist folder and copy it into the `modules/commonjs` directory.
 2. Add the following modules to the `modules` folder:
-    * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.4.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.4.0/android/dist/com.drtech.altbeacon-android-1.4.0.zip)
+    * Android (Sensimity altbeacon module): [com.drtech.altbeacon-android-1.5.0.zip ](https://github.com/Sensimity/android-altbeacon-module/blob/1.5.0/android/dist/com.drtech.altbeacon-android-1.5.0.zip)
     * iOS: [Sensimity TiBeacons module](https://github.com/jbeuckm/TiBeacons/blob/master/org.beuckman.tibeacons-iphone-0.10.0.zip)
 3. Add the dependencies into the `modules` directory, used for the connection with the Sensimity-API and to send statistics to Sensimity:
     * Android/iOS: [reste-commonjs-1.1.8](https://github.com/jasonkneen/RESTe/blob/master/dist/reste-commonjs-1.1.8.zip)
@@ -25,11 +26,13 @@ The installation- and configurationdescription is optimized for using by the [Ti
 
     ```
     <modules>
-        <module platform="commonjs" version="0.4.0">com.sensimity.ti.client</module>
-        <module platform="iphone" version="0.10.0">org.beuckman.tibeacons</module>
-        <module platform="android" version="1.4.0">com.drtech.altbeacon</module>
+        <module platform="commonjs" version="0.8.0">com.sensimity.ti.client</module>
         <module platform="commonjs" version="1.1.8">reste</module>
+        <module platform="iphone" version="0.12.0">org.beuckman.tibeacons</module>
+        <!--<module platform="iphone" version="0.3.1">com.sensimity.ti.pathsense</module>-->
         <module platform="iphone" version="0.3">ti.mely</module>
+        <module platform="android" version="1.5.0">com.drtech.altbeacon</module>
+        <!--<module platform="android" version="0.3.1">com.sensimity.ti.pathsense</module>-->
         <module platform="android" version="0.1">ti.mely</module>
     </modules>
     ```
@@ -49,6 +52,9 @@ The installation- and configurationdescription is optimized for using by the [Ti
         <dict>
             <key>NSLocationAlwaysUsageDescription</key>
             <string>Your description for the reason of using iBeacons</string>
+            <!-- in case of geofences -->
+            <key>NSMotionUsageDescription</key>
+            <string>Your description for the reason of using Geofences</string>
         </dict>
     </plist>
     ```
@@ -67,7 +73,8 @@ The installation- and configurationdescription is optimized for using by the [Ti
                     // Can be found at the Sensimity-dashboard (after login)
                     "instanceRef": "S-<hex eight characters>-<serial-number>",
                     // necessary for android usage
-                    "backgroundService": "services/handleBackgroundScan.js"
+                    "backgroundService": "services/handleBackgroundScan.js",
+                    "monitoringScope": 'uuid|major|minor' // Optionally for beacons, default UUID
                 }
             }
         }
@@ -77,7 +84,7 @@ The installation- and configurationdescription is optimized for using by the [Ti
     ```
         var sensimity = require('com.sensimity.ti.client'),
             callback = function (successMessage) {
-                if (!successMessage.success) {
+                if (!successMessage.success.ble && !successMessage.success.geofence) {
                     console.log('sensimity start failed');
                 }
             };
@@ -98,16 +105,22 @@ The installation- and configurationdescription is optimized for using by the [Ti
 		var serviceIntent = service.intent;
 		var sensimity = require('com.sensimity.ti.client');
 
+        if (serviceIntent.getIntExtra('networkId', -1) !== -1) {
+		    sensimity.start({
+		        networkId: serviceIntent.getIntExtra('networkId', -1),
+		        runInService: true,
+		        behavior: 'aggressive'
+		    });
+		}
+		
+		function stop() {
+		    service.removeEventListener('taskremoved', stop);
+		    sensimity.stop();
+		    service.stop();
+		}
+		    
 		// Stop sensimity on taskremoved service
-		service.addEventListener('taskremoved', function(){
-			sensimity.stop();
-		});
-
-		sensimity.start({
-		    networkId: serviceIntent.getIntExtra('networkId', -1),
-		    runInService: true,
-		    behavior: 'aggressive'
-		});
+        service.addEventListener('taskremoved', stop);
     ```
 
 ### Methods
@@ -168,7 +181,8 @@ To handle the triggered Business Rules and to handle the detected iBeacons, use 
     Ti.App.addEventListener('sensimity:beacon', function (e) {
         e = {
             beacon: <Detected beacon data>,
-            knownBeacon: <Beacon known from Sensimity>
+            knownBeacon: <Beacon known from Sensimity>,
+            type: <enterregion|exitregion|ranging>
         };
     });
     ```
