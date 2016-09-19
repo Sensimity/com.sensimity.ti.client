@@ -93,15 +93,17 @@ export default class ScanService {
 
   destruct() {
     this.stop();
+
     if (this.BLEScanner) {
       this.BLEScanner.destruct();
       this.BLEScanner = undefined;
     }
+
     if (this.geofenceScanner) {
       this.geofenceScanner.destruct();
       this.geofenceScanner = undefined;
     }
-    beaconHandler.destruct();
+
     this.beaconLog.destruct();
     this.beaconLog = undefined;
     Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);

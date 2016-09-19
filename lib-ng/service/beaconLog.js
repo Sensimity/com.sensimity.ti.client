@@ -58,4 +58,10 @@ export default class BeaconLog {
     const collection = createSensimityCollection('BeaconLog');
     collection.erase();
   }
+
+  destruct() {
+    this.timer.stop();
+    this.timer.removeEventListener('onIntervalChange', this.sendBeaconLogs);
+    this.timer = undefined;
+  }
 }

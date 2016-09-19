@@ -98,7 +98,7 @@ const runService = (args, callback) => permissionsCheck(args, callback, () => {
 const stop = () => {
   Alloy.Globals.sensimityDispatcher.off('sensimity:beaconsRefreshed', restartScanner);
   if (!_.isUndefined(Alloy.Globals.sensimityScan)) {
-    Alloy.Globals.sensimityScan.stop();
+    Alloy.Globals.sensimityScan.destruct();
   }
   Alloy.Globals.sensimityScan = undefined;
 };
