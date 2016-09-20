@@ -1,0 +1,24 @@
+{
+  "root": true,
+  "extends": "airbnb/base",
+  "env": {
+    "es6": true
+  },
+  "globals": {
+    "jQuery": false,
+    "$": true,
+    "OS_IOS": true,
+    "OS_ANDROID": true,
+    "_": true,
+    "Backbone": true,
+    "Alloy": true,
+    "require": true,
+    "module": true,
+    "exports": true,
+    "Ti": true,
+    "arguments": true,
+    "WPATH": true,
+    "L": true,
+    "__parentSymbol": true
+  }
+}

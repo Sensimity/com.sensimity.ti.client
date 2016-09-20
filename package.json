@@ -1,6 +1,6 @@
 {
   "name": "com.sensimity.ti.client",
-  "version": "0.5.1",
+  "version": "0.8.0",
   "description": "Client communication with the Sensimity platform",
   "titaniumManifest": {
     "guid": "376928cb-429f-4c7e-ea30-9d38b7d5a240",
@@ -17,7 +17,7 @@
     "url": "https://github.com/Sensimity/com.sensimity.ti.client.git"
   },
   "engines": {
-    "titaniumsdk": ">= 4.0.0"
+    "titaniumsdk": ">= 5.2.2"
   },
   "main": "index.js",
   "keywords": [
@@ -29,23 +29,39 @@
     "insight"
   ],
   "devDependencies": {
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-mocha-test": "~0.12.0",
-    "grunt-titanium": "^0.3.1",
-    "grunt-titaniumifier": "^1.1.0",
-    "grunt-zip": "^0.16.0",
-    "grunt": "^0.4.2",
-    "should": "~4.0.4",
-    "mocha": "~1.21.4"
+    "babel-plugin-transform-object-assign": "^6.1.18",
+    "babel-preset-es2015": "^6.1.4",
+    "eslint": "^1.10.1",
+    "eslint-config-airbnb": "^1.0.0",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.0",
+    "gulp-clean": "^0.3.1",
+    "gulp-copy": "0.0.2",
+    "gulp-eslint": "^1.1.0",
+    "gulp-help": "^1.6.1",
+    "gulp-load-plugins": "^1.1.0",
+    "gulp-shell": "^0.4.3",
+    "gulp-watch": "^4.3.5",
+    "pre-commit": "^1.1.1",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.1.4"
   },
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint lib-ng",
+    "exec": "./dev/git-hooks/pre-commit"
+  },
+  "pre-commit": [
+    "exec"
+  ],
   "nativeDependencies": {
     "alloy": "*",
     "alloy/underscore": "*",
     "alloy/backbone": "*",
+    "alloy/dialogs": "*",
     "reste": "1.1.8",
     "com.drtech.altbeacon": "1.4.0",
-    "org.beuckman.tibeacons": "0.10.1",
+    "org.beuckman.tibeacons": "0.12.0",
+    "com.sensimity.ti.pathsense": "0.3.1",
     "ti.mely": "0.3"
   }
 }
