@@ -1,5 +1,6 @@
 import BaseScanner from './Base';
 import mapper from '../mapper/beuckman';
+import sensimityConfig from '../config/config';
 
 export default class Beuckman extends BaseScanner {
   constructor(beaconLog, beaconHandler) {
@@ -16,7 +17,10 @@ export default class Beuckman extends BaseScanner {
 
   startMonitoring(region) {
     if (this.Beuckman) {
-      this.Beuckman.startMonitoringForRegion(region);
+      const notifyEntryStateOnDisplay = sensimityConfig.notifyEntryStateOnDisplay || 'NO';
+      this.Beuckman.startMonitoringForRegion(Object.assign(region, {
+        notifyEntryStateOnDisplay,
+      }));
     }
   }
 
