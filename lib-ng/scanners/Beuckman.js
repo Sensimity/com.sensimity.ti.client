@@ -17,7 +17,7 @@ export default class Beuckman extends BaseScanner {
 
   startMonitoring(region) {
     if (this.Beuckman) {
-      const notifyEntryStateOnDisplay = sensimityConfig.notifyEntryStateOnDisplay || 'NO';
+      const notifyEntryStateOnDisplay = sensimityConfig.notifyEntryStateOnDisplay ? 'YES' : 'NO';
       this.Beuckman.startMonitoringForRegion(Object.assign(region, {
         notifyEntryStateOnDisplay,
       }));
