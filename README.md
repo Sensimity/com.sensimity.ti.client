@@ -29,10 +29,10 @@ The installation- and configuration description is optimized for usage via the [
         <module platform="commonjs" version="0.8.0">com.sensimity.ti.client</module>
         <module platform="commonjs" version="1.1.8">reste</module>
         <module platform="iphone" version="0.12.0">org.beuckman.tibeacons</module>
-        <!--<module platform="iphone" version="0.3.1">com.sensimity.ti.pathsense</module>-->
+        <!--<module platform="iphone" version="0.5.0">com.sensimity.ti.pathsense</module>-->
         <module platform="iphone" version="0.3">ti.mely</module>
         <module platform="android" version="1.5.0">com.drtech.altbeacon</module>
-        <!--<module platform="android" version="0.3.1">com.sensimity.ti.pathsense</module>-->
+        <!--<module platform="android" version="0.5.0">com.sensimity.ti.pathsense</module>-->
         <module platform="android" version="0.1">ti.mely</module>
     </modules>
     ```

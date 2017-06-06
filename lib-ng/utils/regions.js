@@ -5,7 +5,7 @@ const getGeofenceRegions = beacons => _.uniq(
     identifier: `${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}|${beacon.get('beacon_id')}`,
     latitude: beacon.get('latitude'),
     longitude: beacon.get('longitude'),
-    radius: 100,
+    radius: (Ti.Platform.osname === 'android' ? 200 : 100),
   }))
 , false, beacon => beacon.identifier);
 
