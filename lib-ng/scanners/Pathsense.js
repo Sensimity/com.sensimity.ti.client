@@ -34,7 +34,9 @@ export default class Pathsense extends BaseScanner {
 
   destruct() {
     if (this.Pathsense) {
-      this.Pathsense.destroy();
+      if (Ti.Platform.osname === 'android') {
+        this.Pathsense.destroy();
+      }
       this.Pathsense.removeEventListener('enteredRegion', this.enteredRegion);
       this.Pathsense.removeEventListener('exitedRegion', this.exitedRegion);
     }
