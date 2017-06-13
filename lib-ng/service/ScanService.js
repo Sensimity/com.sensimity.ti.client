@@ -3,7 +3,7 @@ import Beuckman from '../scanners/Beuckman';
 import Pathsense from '../scanners/Pathsense';
 import beaconHandler from '../handlers/beaconHandler';
 import knownBeaconService from './knownBeacons';
-import BeaconLog from './BeaconLog';
+import BeaconLog from './beaconLog';
 import { split, getNearestGeofences } from '../utils/regions';
 
 export default class ScanService {
@@ -16,9 +16,10 @@ export default class ScanService {
     this.options = Object.assign({
       runInService: false,
       hooks: {},
+      logScanResults: true,
     }, args);
     beaconHandler.init();
-    this.beaconLog = new BeaconLog();
+    this.beaconLog = (this.options.logScanResults) ? new BeaconLog() : null;
     this.restart = this.restart.bind(this);
     Ti.App.addEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
 
@@ -104,8 +105,10 @@ export default class ScanService {
       this.geofenceScanner = undefined;
     }
 
-    this.beaconLog.destruct();
-    this.beaconLog = undefined;
+    if (this.options.logScanresults) {
+      this.beaconLog.destruct();
+      this.beaconLog = undefined;
+    }
     Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
   }
 

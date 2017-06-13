@@ -1,6 +1,3 @@
-global-deps:
-  - npm install -g titaniumifier@1.5.1
-
 pr[number]:
   - git remote prune upstream
   - git fetch upstream refs/pull/%number%/head:refs/remotes/upstream/pr/%number%
@@ -8,8 +5,8 @@ pr[number]:
   - =update-code
 
 update-code:
-  - npm install
+  - yarn install
 
 build:
-  - gulp build
-  - titaniumifier --out dist
+  - ./node_modules/.bin/gulp build
+  - ./node_modules/.bin/titaniumifier --out dist

@@ -1,6 +1,5 @@
 import sensimityConfig from '../config/config';
 import { _ } from 'alloy/underscore';
-import Timer from 'ti.mely';
 import client from '../client/client';
 import { createSensimityCollection, createSensimityModel } from '../utils/backbone';
 import knownBeaconService from './knownBeacons';
@@ -8,7 +7,7 @@ import knownBeaconService from './knownBeacons';
 export default class BeaconLog {
   constructor() {
     // Send beaconlogs every 30 seconds
-    this.timer = Timer.createTimer();
+    this.timer = require('ti.mely').createTimer();
     this.timer.start({
       interval: 30000,
     });
