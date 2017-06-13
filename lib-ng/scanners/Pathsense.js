@@ -40,5 +40,3 @@ export default class Pathsense extends BaseScanner {
     }
   }
 }
-
-export default Pathsense;
