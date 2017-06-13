@@ -19,7 +19,7 @@ export default class ScanService {
       logScanResults: true,
     }, args);
     beaconHandler.init();
-    this.beaconLog = (this.options.logScanresults) ? new BeaconLog() : null;
+    this.beaconLog = (this.options.logScanResults) ? new BeaconLog() : null;
     this.restart = this.restart.bind(this);
     Ti.App.addEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
 
