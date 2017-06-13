@@ -3,7 +3,7 @@ import Beuckman from '../scanners/Beuckman';
 import Pathsense from '../scanners/Pathsense';
 import beaconHandler from '../handlers/beaconHandler';
 import knownBeaconService from './knownBeacons';
-import BeaconLog from './BeaconLog';
+import BeaconLog from './beaconLog';
 import { split, getNearestGeofences } from '../utils/regions';
 
 export default class ScanService {
