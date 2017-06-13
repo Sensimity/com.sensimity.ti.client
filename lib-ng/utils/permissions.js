@@ -81,6 +81,7 @@ const isBLEEnabled = callback => {
     BLEModule = getBLEModule();
   } catch (e) {
     Ti.API.warn('Could not isBLEEnabled, please insert a BLE module');
+    callback(false);
     return;
   }
 

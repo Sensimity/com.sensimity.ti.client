@@ -1,6 +1,6 @@
 {
   "name": "com.sensimity.ti.client",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Client communication with the Sensimity platform",
   "titaniumManifest": {
     "guid": "376928cb-429f-4c7e-ea30-9d38b7d5a240",
@@ -44,7 +44,8 @@
     "gulp-watch": "^4.3.5",
     "pre-commit": "^1.1.1",
     "require-dir": "^0.3.0",
-    "run-sequence": "^1.1.4"
+    "run-sequence": "^1.1.4",
+    "titaniumifier": "^1.5.1"
   },
   "scripts": {
     "lint": "./node_modules/.bin/eslint lib-ng",
@@ -61,7 +62,7 @@
     "reste": "1.1.8",
     "com.drtech.altbeacon": "1.4.0",
     "org.beuckman.tibeacons": "0.12.0",
-    "com.sensimity.ti.pathsense": "0.3.1",
+    "com.sensimity.ti.pathsense": "0.5.0",
     "ti.mely": "0.3"
   }
 }

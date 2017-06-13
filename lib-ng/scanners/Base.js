@@ -38,7 +38,9 @@ export default class BaseScanner {
     if (_.isUndefined(beaconRaw.rssi) || parseInt(beaconRaw.rssi, 10) === 0) { return; }
 
     const beacon = this.mapper.beacon(beaconRaw);
-    this.beaconLog.insertBeaconLog(beacon);
+    if (this.beaconLog !== null) {
+      this.beaconLog.insertBeaconLog(beacon);
+    }
     if (sensimityConfig.ranging) {
       this.beaconHandler.handle(beacon);
     }
