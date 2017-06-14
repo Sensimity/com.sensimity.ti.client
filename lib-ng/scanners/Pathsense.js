@@ -29,7 +29,9 @@ export default class Pathsense extends BaseScanner {
   * Sort geofence-regions by distance inside a defined radius from a predefined location.
   */
   sortRegionsByDistance(regions, location, defaultRadius = 5000) {
-    return this.Pathsense.sortRegionsByDistance(regions, location, defaultRadius);
+    if (this.Pathsense) {
+      return this.Pathsense.sortRegionsByDistance(regions, location, defaultRadius);
+    }
   }
 
   destruct() {

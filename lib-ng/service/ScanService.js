@@ -5,6 +5,7 @@ import beaconHandler from '../handlers/beaconHandler';
 import knownBeaconService from './knownBeacons';
 import BeaconLog from './beaconLog';
 import { split, getNearestGeofences } from '../utils/regions';
+import { entered as checkRegionEntered } from '../check/region';
 
 export default class ScanService {
   constructor(args = {}) {
@@ -54,19 +55,23 @@ export default class ScanService {
 
   startGeofence(regions) {
     const scanner = this.getGeofenceScanner();
-    const callback = nearestRegions => nearestRegions.forEach(
-      region => scanner.startMonitoring(region)
-    );
+    const callback = nearestRegions => {
+      nearestRegions.forEach((region) => scanner.startMonitoring(region));
+      checkRegionEntered(scanner, nearestRegions);
+    };
 
     // geofence-regions are already filtered by the hook, nearest geofences filter not needed
     if (_.isFunction(this.options.hooks.getRegionsToMonitor)) {
-      callback(regions);
+      getNearestGeofences({
+        distance: 75000,
+        regions,
+        callback,
+      });
       return;
     }
 
-    const sortRegionsByDistance = scanner.sortRegionsByDistance;
     getNearestGeofences({
-      sortRegionsByDistance,
+      count: 5,
       regions,
       callback,
     });
