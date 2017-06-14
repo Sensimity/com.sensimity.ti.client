@@ -1,11 +1,20 @@
 language: node_js
 node_js:
-  - "4.5.0"
-
+- 4.8.3
 cache:
+  yarn: true
   directories:
-    - node_modules
-
+  - node_modules
 script:
-  - npm run lint
-
+- yarn run lint
+- "./node_modules/.bin/gulp build"
+- "./node_modules/.bin/titaniumifier --out dist"
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: YuNrEyG4KEpbzlFhyNxabvZJKc19N/EmrK+vrt/rpgFFmlI39fOkP2sdo2Z8rzWrn6z4fVX5vWGrrU2+z4FXKbhh5uBa/LilvSAWGZbUrAUaf7Y/QQlRpBR4fF82Hx2FIZJ0wEE3gkkusiMD1g3I9Yceir3gemZVLaIUCym1gHpl4fzchecqwIW++JLwq/nkfiVu7PJnBzA3XVnFQtXA4WGj8Lw9tPOyzaKcgC1R31PxBg6gUO6YaRnjsa2NNJC7ae88C+m11w6b1joKKbrxUSqvmGP7NlVjRsnXAcyczwqvVwjqPP5XfyGN43cnAf/MSOAZ6GHaMkEchN1aMKiCZ+xkCG5zEswgdztwbCMhqxKUam73s4GkOPJy6p0LBPytRz6ht3GTJsvb97FN14srRwUaD1Bu5nKPLa5l9EjMUHLIMwYLJEVfSBTxz4Ix9PJCpJUERpS03884XayEd/uWdzaQasJRKRrytYEMjSFcz3t217Gd+qvkawk7qLsRRRaqkj2dhNMyEMLPg5fFXuJse+jwz4SqQ/n6QNA3D3qtNtR3zrYhLtfQe6ATQeVfJK3lYGdAdCD9WJLKTdJ33srOkLXIxNd9UEt7CH2PPk+lJcU6dOtzzKf8vIVXkNiFEK4IvK9mi9KUvKwLpMt8M8ch1AANLAqn6YuywEQFzUasyVg=
+  file: dist/com.sensimity.ti.client-commonjs-${TRAVIS_TAG}.zip
+  on:
+    repo: Sensimity/com.sensimity.ti.client
+    tags: true
