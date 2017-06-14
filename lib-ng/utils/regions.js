@@ -5,7 +5,7 @@ const getGeofenceRegions = beacons => _.uniq(
     identifier: `${beacon.get('UUID')}|${beacon.get('major')}|${beacon.get('minor')}|${beacon.get('beacon_id')}`,
     latitude: beacon.get('latitude'),
     longitude: beacon.get('longitude'),
-    radius: 125,
+    radius: sensimityConfig.geofenceRadius,
   }))
 , false, beacon => beacon.identifier);
 
@@ -35,12 +35,12 @@ const getBLERegions = beacons => _.uniq(
 , false, beacon => beacon.identifier);
 
 // Use the current position to detect the 20 nearest geofences within 7500 m
-const getNearestGeofences = ({ regions, callback, distance = 7500, count = 20 }) =>
+const getNearestGeofences = ({ scanner, regions, callback, distance = 7500, count = 20 }) =>
   Ti.Geolocation.getCurrentPosition((e) => {
     let nearestGeofenceRegions;
     if (e.success) {
       // Detect only the nearest geofences within 7.5 km
-      nearestGeofenceRegions = require('com.sensimity.ti.pathsense').sortRegionsByDistance(regions, _.pick(e.coords, 'latitude', 'longitude'), distance);
+      nearestGeofenceRegions = scanner.sortRegionsByDistance(regions, _.pick(e.coords, 'latitude', 'longitude'), distance);
     }
     callback(_.first(nearestGeofenceRegions || regions, count ));
   });
