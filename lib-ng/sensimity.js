@@ -119,6 +119,30 @@ const resume = () => {
   Alloy.Globals.sensimityScan.setBackgroundMode(false);
 };
 
+const addEventListener = (event, callback) => {
+  if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
+    return;
+  }
+
+  Alloy.Globals.sensimityDispatcher.on(event, callback);
+};
+
+const removeEventListener = (event, callback) => {
+  if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
+    return;
+  }
+
+  Alloy.Globals.sensimityDispatcher.off(event, callback);
+};
+
+const fireEvent = (event) => {
+  if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
+    return;
+  }
+
+  Alloy.Globals.sensimityDispatcher.trigger(event);
+};
+
 const getKnownBeacons = knownBeaconService.getKnownBeacons;
 export {
   start,
@@ -130,4 +154,7 @@ export {
   isBLESupported,
   isBLEEnabled,
   getKnownBeacons,
+  addEventListener,
+  removeEventListener,
+  fireEvent,
 };
