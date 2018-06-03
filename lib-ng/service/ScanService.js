@@ -1,3 +1,4 @@
+import { _ } from 'alloy/underscore';
 import Altbeacon from '../scanners/Altbeacon';
 import Beuckman from '../scanners/Beuckman';
 import Pathsense from '../scanners/Pathsense';
@@ -94,25 +95,22 @@ export default class ScanService {
 
   restart() {
     this.stop();
-    this.start();
+    _.defer(this.start.bind(this));
   }
 
   destruct() {
     this.stop();
 
     if (this.BLEScanner) {
-      this.BLEScanner.destruct();
-      this.BLEScanner = undefined;
+      _.defer(this.BLEScanner.destruct.bind(this.BLEScanner));
     }
 
     if (this.geofenceScanner) {
-      this.geofenceScanner.destruct();
-      this.geofenceScanner = undefined;
+      _.defer(this.geofenceScanner.destruct.bind(this.geofenceScanner));
     }
 
     if (this.options.logScanresults) {
-      this.beaconLog.destruct();
-      this.beaconLog = undefined;
+      _.defer(this.beaconLog.destruct.bind(this.beaconLog));
     }
     Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
   }
