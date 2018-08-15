@@ -51,8 +51,19 @@ const handleSuccessfullFetchingBeacons = data => {
 /**
  * Function to refresh the beacons from Sensimity
  * @param networkIds The network identifiers which must be refreshed
+ * @param ownBeacons your own non Sensimity beacons.
  */
-const refreshBeacons = networkIds => {
+const refreshBeacons = (networkIds, ownBeacons = null) => {
+  if (ownBeacons !== null) {
+    createSensimityCollection('KnownBeacon').erase();
+    handleSuccessfullFetchingBeacons({
+      _embedded: {
+        beacon: ownBeacons,
+      },
+    });
+    return;
+  }
+
   if (Ti.Network.getOnline()) {
     _.uniq(networkIds).forEach(id => {
       createSensimityCollection('KnownBeacon').erase();

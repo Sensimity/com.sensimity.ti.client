@@ -19,6 +19,7 @@ export default class ScanService {
       runInService: false,
       hooks: {},
       logScanResults: true,
+      ownBeacons: null,
     }, args);
     beaconHandler.init();
     this.beaconLog = (this.options.logScanResults) ? new BeaconLog() : null;
@@ -30,7 +31,7 @@ export default class ScanService {
       return;
     }
 
-    knownBeaconService.refreshBeacons([this.options.networkId]);
+    knownBeaconService.refreshBeacons([this.options.networkId], this.options.ownBeacons);
   }
 
   start() {
