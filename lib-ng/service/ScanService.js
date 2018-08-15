@@ -24,14 +24,15 @@ export default class ScanService {
     beaconHandler.init();
     this.beaconLog = (this.options.logScanResults) ? new BeaconLog() : null;
     this.restart = this.restart.bind(this);
-    Ti.App.addEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
+    Alloy.Globals.sensimityDispatcher.on('sensimity:hooks:updateRegionsToMonitor', this.restart);
+    Alloy.Globals.sensimityDispatcher.on('sensimity:beaconsRefreshed', this.restart);
 
     if (Ti.Platform.osname === 'iphone' && Ti.App.arguments.launchOptionsLocationKey) {
       // Do not refresh beacons if the app has been started based on an enter/exited region event
       return;
     }
 
-    knownBeaconService.refreshBeacons([this.options.networkId], this.options.ownBeacons);
+    _.defer(knownBeaconService.refreshBeacons.bind(knownBeaconService), [this.options.networkId], this.options.ownBeacons);
   }
 
   start() {
@@ -70,13 +71,13 @@ export default class ScanService {
 
     if (_.isFunction(this.options.hooks.getRegionsToMonitor)) {
       // Order every region because it's already filtered within the hook
-      nearestRegionsParameters.distance = 75000;
+      nearestRegionsParameters.distance = 300000;
     } else {
       // Maximize the default nearestRegionsParameters count to 5 so there's still space for beacons
       nearestRegionsParameters.count = 5;
     }
 
-    getNearestGeofences(nearestRegionsParameters);
+    _.defer(getNearestGeofences, nearestRegionsParameters);
   }
 
   stop() {
@@ -113,7 +114,8 @@ export default class ScanService {
     if (this.options.logScanresults) {
       _.defer(this.beaconLog.destruct.bind(this.beaconLog));
     }
-    Ti.App.removeEventListener('sensimity:hooks:updateRegionsToMonitor', this.restart);
+    Alloy.Globals.sensimityDispatcher.off('sensimity:hooks:updateRegionsToMonitor', this.restart);
+    Alloy.Globals.sensimityDispatcher.off('sensimity:beaconsRefreshed', this.restart);
   }
 
   getRegions() {
