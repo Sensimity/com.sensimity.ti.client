@@ -10,13 +10,6 @@ if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
   Alloy.Globals.sensimityDispatcher = dispatcher();
 }
 
-// After refreshing beacons, restart the scanner
-const restartScanner = () => {
-  if (!_.isUndefined(Alloy.Globals.sensimityScan)) {
-    Alloy.Globals.sensimityScan.restart();
-  }
-};
-
 // Create an scanner, specific for the running platform
 const startScanner = options => {
   if (!_.isUndefined(Alloy.Globals.sensimityScan) || !_.has(options, 'networkId')) {
@@ -29,8 +22,7 @@ const startScanner = options => {
   }
 
   Alloy.Globals.sensimityScan = new Scan(scanOptions);
-  Alloy.Globals.sensimityDispatcher.on('sensimity:beaconsRefreshed', restartScanner);
-  Alloy.Globals.sensimityScan.start();
+  _.defer(Alloy.Globals.sensimityScan.start.bind(Alloy.Globals.sensimityScan));
 };
 
 const permissionsCheck = (args, callback, boot) =>
@@ -96,7 +88,6 @@ const runService = (args, callback) => permissionsCheck(args, callback, () => {
  * Stop scanning
  */
 const stop = () => {
-  Alloy.Globals.sensimityDispatcher.off('sensimity:beaconsRefreshed', restartScanner);
   if (!_.isUndefined(Alloy.Globals.sensimityScan)) {
     Alloy.Globals.sensimityScan.destruct();
   }
@@ -119,6 +110,30 @@ const resume = () => {
   Alloy.Globals.sensimityScan.setBackgroundMode(false);
 };
 
+const addEventListener = (event, callback) => {
+  if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
+    return;
+  }
+
+  Alloy.Globals.sensimityDispatcher.on(event, callback);
+};
+
+const removeEventListener = (event, callback) => {
+  if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
+    return;
+  }
+
+  Alloy.Globals.sensimityDispatcher.off(event, callback);
+};
+
+const fireEvent = (event) => {
+  if (_.isUndefined(Alloy.Globals.sensimityDispatcher)) {
+    return;
+  }
+
+  Alloy.Globals.sensimityDispatcher.trigger(event);
+};
+
 const getKnownBeacons = knownBeaconService.getKnownBeacons;
 export {
   start,
@@ -130,4 +145,7 @@ export {
   isBLESupported,
   isBLEEnabled,
   getKnownBeacons,
+  addEventListener,
+  removeEventListener,
+  fireEvent,
 };

@@ -60,27 +60,22 @@ const handleBusinessRule = (businessRule, beacon, knownBeacon) => {
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.far) && _.isEqual(beacon.proximity, proximities.far)) {
     Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
-    Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.close) && _.isEqual(beacon.proximity, proximities.close)) {
     Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
-    Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.immediate) && _.isEqual(beacon.proximity, proximities.immediate)) {
     Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
-    Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.movingTowards) && checkMovingTowards(beacon.proximity, knownBeacon.get('beacon_id'))) {
     Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
-    Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 
   if (_.isEqual(businessRuleType, typeOfAvailableBusinessRules.movingAwayFrom) && checkMovingAwayFrom(beacon.proximity, knownBeacon.get('beacon_id'))) {
     Alloy.Globals.sensimityDispatcher.trigger('sensimity:businessrule', businessRuleTriggerItem);
-    Ti.App.fireEvent('sensimity:businessrule', businessRuleTriggerItem);
   }
 };
 
@@ -96,7 +91,6 @@ const handleBeacon = ({ beacon, knownBeacon, type }) => {
     eventType: type,
   };
   Alloy.Globals.sensimityDispatcher.trigger('sensimity:beacon', eventItem);
-  Ti.App.fireEvent('sensimity:beacon', eventItem);
 };
 
 /**
