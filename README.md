@@ -171,6 +171,24 @@ All of the methods are accessible by using the Sensimity Client library:
         networkId: <integer>
     });
     ```
+### Using your own beacons
+If you want to start the Scanner without using Sensimity you can inject your own custom beacons by doing the following:
+```js
+sensimity.start({
+    ownBeacons: [
+        {
+            major: '123',
+            minor: '123',
+            uuid_beacon: '123',
+            title: 'My custom beacon',
+            description: 'My custom beacon',
+            latitude: '52.128759',
+            longitude: '6.438053',
+            is_geofence: true
+        }
+    ]
+});
+```
 
 ### Events
 To handle the triggered Business Rules and to handle the detected iBeacons, use the following eventListeners:
