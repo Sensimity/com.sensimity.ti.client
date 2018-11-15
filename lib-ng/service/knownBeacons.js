@@ -56,11 +56,7 @@ const handleSuccessfullFetchingBeacons = data => {
 const refreshBeacons = (networkIds, ownBeacons = null) => {
   if (ownBeacons !== null) {
     createSensimityCollection('KnownBeacon').erase();
-    handleSuccessfullFetchingBeacons({
-      _embedded: {
-        beacon: ownBeacons,
-      },
-    });
+    saveNewBeacons(ownBeacons);
     return;
   }
 
