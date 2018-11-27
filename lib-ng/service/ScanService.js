@@ -20,12 +20,17 @@ export default class ScanService {
       hooks: {},
       logScanResults: true,
       ownBeacons: null,
+      bgScan: false,
     }, args);
     beaconHandler.init();
     this.beaconLog = (this.options.logScanResults) ? new BeaconLog() : null;
     this.restart = this.restart.bind(this);
+    this.destruct = this.destruct.bind(this);
     Alloy.Globals.sensimityDispatcher.on('sensimity:hooks:updateRegionsToMonitor', this.restart);
     Alloy.Globals.sensimityDispatcher.on('sensimity:beaconsRefreshed', this.restart);
+    if (this.options.bgScan === false) {
+      Ti.App.addEventListener('close', this.destruct);
+    }
 
     if (Ti.Platform.osname === 'iphone' && Ti.App.arguments.launchOptionsLocationKey) {
       // Do not refresh beacons if the app has been started based on an enter/exited region event
@@ -116,6 +121,9 @@ export default class ScanService {
     }
     Alloy.Globals.sensimityDispatcher.off('sensimity:hooks:updateRegionsToMonitor', this.restart);
     Alloy.Globals.sensimityDispatcher.off('sensimity:beaconsRefreshed', this.restart);
+    if (this.options.bgScan === false) {
+      Ti.App.removeEventListener('close', this.destruct);
+    }
   }
 
   getRegions() {
