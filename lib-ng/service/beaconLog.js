@@ -7,7 +7,7 @@ import knownBeaconService from './knownBeacons';
 export default class BeaconLog {
   constructor() {
     // Send beaconlogs every 30 seconds
-    this.timer = require('ti.mely').createTimer();
+    this.timer = global.require('ti.mely').createTimer();
     this.timer.start({
       interval: 30000,
     });

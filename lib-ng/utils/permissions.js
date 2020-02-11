@@ -56,9 +56,9 @@ const requestLocationPermissions = callback => {
 
 const getBLEModule = () => {
   if (Ti.Platform.osname === 'android') {
-    return require('com.drtech.altbeacon');
+    return global.require('com.drtech.altbeacon');
   }
-  return require('org.beuckman.tibeacons');
+  return global.require('org.beuckman.tibeacons');
 };
 
 const isBLESupported = () => {

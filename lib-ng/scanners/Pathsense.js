@@ -1,7 +1,7 @@
 import BaseScanner from './Base';
 import mapper from '../mapper/pathsense';
 
-const proxy = require('com.sensimity.ti.pathsense');
+const proxy = global.require('com.sensimity.ti.pathsense');
 
 export default class Pathsense extends BaseScanner {
   constructor(beaconHandler) {

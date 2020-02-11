@@ -5,7 +5,7 @@ export default class Altbeacon extends BaseScanner {
   constructor(runInService, beaconLog, beaconHandler) {
     super(mapper, beaconLog, beaconHandler);
     try {
-      this.Altbeacon = require('com.drtech.altbeacon');
+      this.Altbeacon = global.require('com.drtech.altbeacon');
       this.scanPeriods = {
         proactive: {
           foregroundScanPeriod: 1101,

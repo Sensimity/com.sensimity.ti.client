@@ -6,7 +6,7 @@ export default class Beuckman extends BaseScanner {
   constructor(beaconLog, beaconHandler) {
     super(mapper, beaconLog, beaconHandler);
     try {
-      this.Beuckman = require('org.beuckman.tibeacons');
+      this.Beuckman = global.require('org.beuckman.tibeacons');
       this.regionState = this.regionState.bind(this);
       this.rangedBeacons = this.rangedBeacons.bind(this);
       this.addAllEventListeners();
